@@ -1,0 +1,61 @@
+<!--중요: 이 파일은 건들지 말아주세요. html파일을 새로 만들고,
+<DOCTYPE html>부터 마지막까지 전부 복사하신다음에 주석은 지워주세요. 그리고
+{%block content%}{% endblock %} 부분에 여러분의 html을 작성해주세요.
+
+자바스크립트 파일과 CSS 파일은 우선적으로 html 파일에 전부 작성하도록 합니다.
+CSS는 head의 맨 마지막에 style태그를 추가하여 작성해주세요.
+JAVASCRIPT는 body의 맨 마지막에 script 태그를 추가하여 작성해주세요.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- needed to add favicon and og tags -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <link href="{{ url_for('static', filename='index.css') }}" rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script src="https://kit.fontawesome.com/d755ebaf85.js" crossorigin="anonymous"></script>
+<!--    <style>-->
+<!--        -->
+<!--    </style>-->
+</head>
+<body>
+    <div id="root" class="container">
+        <nav class="navbar">
+            <div class="container">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="/">
+                        뭐먹었니?
+                    </a>
+                    <span class="navbar-burger" data-target="navbarMenuHeroA">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </div>
+                <div id="navbarMenuHeroA" class="navbar-menu">
+                    <div class="navbar-end">
+                        <button class="navbar-item logout-button">
+                            로그아웃
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+      <main class="contents">
+          {%block content%}{% endblock %}
+      </main>
+    </div>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
+<!--    <script></script>-->
+</body>
+</html>
