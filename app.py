@@ -9,7 +9,7 @@ def home():
 
 @app.route('/mypage')
 def asd():
-    return 'hello world'
+    return '민갑입니다.'
 
 
 if __name__ == '__main__':
