@@ -9,7 +9,7 @@ def home():
 
 @app.route('/mypage')
 def asd():
-    return 'mypage!'
+    return 'hello world'
 
 
 if __name__ == '__main__':
