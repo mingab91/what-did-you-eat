@@ -19,7 +19,7 @@ app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 
 SECRET_KEY = SECRET_KEY
 client = MongoClient(IP, int(PORT))
-db = DBNAME
+db = client.dbsparta_plus_week4
 
 
 @app.route('/')
