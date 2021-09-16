@@ -101,7 +101,7 @@ JAVASCRIPT는 body의 맨 마지막에 script 태그를 추가하여 작성해�
                     <div class="card column is-11">
                         <div class="card-image">
                             <figure class="image is-4by3">
-                                <img src="{{ post.post_pic_real }}"
+                                <img src="static/{{ post.post_pic_real }}"
                                      alt="{{ post.post_pic }}">
                             </figure>
                         </div>
@@ -109,20 +109,20 @@ JAVASCRIPT는 body의 맨 마지막에 script 태그를 추가하여 작성해�
                             <div class="media">
                                 <div class="media-left">
                                     <a href="/user/{{ post.username }}" class="image is-48x48">
-                                        <img src="{{ post.profile_pic_real }}"
+                                        <img src="static/{{ post.profile_pic_real }}"
                                              alt="Placeholder image">
                                     </a>
                                 </div>
                                 <div class="media-content">
                                     <a href="/user/{{ post.username }}" class="title is-4">{{ post.profile_name }}</a>
-                                    <a href="/user/{{ post.username }}" class="subtitle is-6">@{{ post.profile_name }}</a>
+                                    <a href="/?food_give={{ post.post_title }}" class="subtitle is-6">@{{ post.post_title }}</a>
                                 </div>
                             </div>
 
                             <div class="content">
                                 {{ post.post_comment }}
                                 <br>
-                                <time datetime="2016-1-1">{{ post.post_date }}</time>
+                                <time datetime="2016-1-1">{{ post.post_day }}</time>
                             </div>
                         </div>
                     </div>
