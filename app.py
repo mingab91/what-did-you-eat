@@ -110,6 +110,43 @@ def check_dup():
     username_receive = request.form['username_give']
     exists = bool(db.users.find_one({"username": username_receive}))
     return jsonify({'result': 'success', 'exists': exists})
+@app.route('/new', methods=['POST'])
+def add_post():
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+        username = payload["id"]
+        user_info = db.users.find_one({'username': username}, {"_id": False})
+
+        post_title = request.form['title_give']
+        post_day = request.form['day_give']
+        post_comment = request.form['comment_give']
+
+        new_doc = {
+            "username": user_info['username'],
+            "profile_name": user_info['profile_name'],
+            "profile_pic_real": user_info['profile_pic_real'],
+            "post_title": post_title,
+            "post_day": post_day,
+            "post_comment": post_comment
+        }
+
+        if 'file_give' in request.files:
+            file = request.files["file_give"]
+            filename = secure_filename(file.filename)
+            extension = filename.split(".")[-1]
+
+            file_path = f"post_pics/{username}_{post_day}.{extension}"
+            file.save("./static/" + file_path)
+
+            new_doc["post_pic"] = filename
+            new_doc["post_pic_real"] = file_path
+
+        db.posts.insert_one(new_doc)
+        return jsonify({"result": "success", 'msg': '프로필을 업데이트했습니다.'})
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        return redirect(url_for("home"))
 
 if __name__ == '__main__':
    app.run('0.0.0.0', port=5000, debug=True)
