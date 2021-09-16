@@ -1,12 +1,3 @@
-<!--중요: 이 파일은 건들지 말아주세요. html파일을 새로 만들고,
-<DOCTYPE html>부터 마지막까지 전부 복사하신다음에 주석은 지워주세요. 그리고
-부분에 여러분의 html을 작성해주세요.
-
-자바스크립트 파일과 CSS 파일은 우선적으로 html 파일에 전부 작성하도록 합니다.
-CSS는 head의 맨 마지막에 style태그를 추가하여 작성해주세요.
-JAVASCRIPT는 body의 맨 마지막에 script 태그를 추가하여 작성해주세요.
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,38 +15,17 @@ JAVASCRIPT는 body의 맨 마지막에 script 태그를 추가하여 작성해�
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
     <script src="https://kit.fontawesome.com/d755ebaf85.js" crossorigin="anonymous"></script>
-<!--    <style>-->
-<!--        -->
-<!--    </style>-->
 </head>
 <body>
-    <div id="root" class="container">
-        <nav class="navbar">
-            <div class="container">
-                <div class="navbar-brand">
-                    <a class="navbar-item" href="/">
-                        뭐먹었니?
-                    </a>
-                    <span class="navbar-burger" data-target="navbarMenuHeroA">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </span>
-                </div>
-                <div id="navbarMenuHeroA" class="navbar-menu">
-                    <div class="navbar-end">
-                        <button class="navbar-item logout-button">
-                            로그아웃
-                        </button>
-                    </div>
-                </div>
+    <section class="hero is-medium is-link">
+        <div class="hero-body">
+            <div class="container has-text-centered">
+                <h1 class="layout__title">뭐먹었니?</h1>
             </div>
-        </nav>
-      <main class="contents">
-          {%block content%}{% endblock %}
-      </main>
+        </div>
+    </section>
+    {%block content%}{% endblock %}
     </div>
     <script src="{{ url_for('static', filename='index.js') }}"></script>
-<!--    <script></script>-->
 </body>
 </html>

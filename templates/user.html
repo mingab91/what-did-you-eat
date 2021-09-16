@@ -1,0 +1,228 @@
+{% extends "layout.html" %}
+{% block content %}
+<main class="user">
+    <div class="box profile__wrapper">
+        <article class="media profile">
+            <figure class="media-left profile__left">
+                <img class="profile__image" src="/static/{{user_info['profile_pic_real']}}">
+            </figure>
+            <div class="media-content profile__right">
+                <div class="content is-large profile__description">
+                    <div class="profile__description--top">
+                        <span class="profile__user-id">{{user_info.username}}</span>
+                    </div>
+                    <div class="profile__description--bottom">
+                        <span class="profile__user-id">{{user_info['profile_name']}}</span>
+                        {% if status %}
+                        <span>님, 오늘은 무엇을 드셨나요?</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </article>
+        {% if status %}
+        <p class="buttons profile__user-button">
+            <button clsss="profile__button">
+                게시물 작성
+            </button>
+            <span
+                class="profile__navigation"
+                onclick="$('#setting').addClass('is-active')"
+            >
+                <i class="fas fa-cog fa-2x "></i>
+            </span>
+        </p>
+        <div id="setting" class="modal user__setting">
+            <div class="modal-background" onclick="$('#setting').removeClass('is-active')"></div>
+            <div class="setting__wrapper modal-content">
+                <div class="setting__form">
+                    <h1 class="setting__title">
+                        유저 정보 수정
+                    </h1>
+                    <div class="field setting__field">
+                        <label class="label" for="setting__nick">닉네임</label>
+                        <div class="control setting__control">
+                            <input id="setting__nick"
+                                   class="input"
+                                   type="text"
+                                   name="nick_give"
+                            >
+                        </div>
+                    </div>
+                    <div class="field setting__field">
+                        <label class="label" for="setting__profile-picture">프로필 사진</label>
+                        <div class="control setting__control">
+                            <input id="setting__profile-picture"
+                                   class="input"
+                                   type="file"
+                                   name="file_give"
+                                   accept=".png, .jpg, image/png, image/jpg"
+                                   onchange="validateExtension(event)"
+                            >
+                        </div>
+                    </div>
+                    <div class="field setting__field is-grouped">
+                        <div class="control">
+                            <button
+                                class="button setting__save-button"
+                                onclick="modifyUserInformation('{{user_info.username}}')"
+                            >
+                                제출하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button class="button setting__delete is-danger" onclick="deleteAccount('{{user_info.username}}')">
+                    탈퇴하기
+                </button>
+            </div>
+            <div
+                class="modal-close setting__close-button"
+                onclick="$('#setting').removeClass('is-active')"
+            ></div>
+        </div>
+        {% endif %}
+    </div>
+    <section class="user__post">
+        <div class="user__post-container">
+            {% for post in posts_info %}
+            <div class="user__post-card card">
+                <div class="card-image">
+                <img src="/static/{{post['post_pic_real']}}" alt="Placeholder image" class="post__image">
+                </div>
+                <nav class="user__post-info level is-mobile" onclick="openPost('{{post._id}}')">
+                    <div class="level-item has-text-centered">
+                        <div>
+                            <p>
+                                <span class="icon is-medium post__heart-icon">
+                                    <i class="fa fa-heart" aria-hidden="true"></i>
+                                </span>
+                            </p>
+                            <p>2.7k</p>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+<script src="{{ url_for('static', filename='index.js') }}"></script>
+<script>
+    const openPost = async (id) => {
+    const response = await fetch(`/p/${id}`);
+    const {
+        post: {
+            post_comment: comment,
+            post_day: visitedDay,
+            post_pic_real: postImagePath,
+            post_title: title,
+            profile_name: nickname,
+            username
+        },
+        user: { profile_pic_real: profileImagePath }} = await response.json();
+
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('modal', 'is-active');
+    wrapper.id = 'post-detail';
+
+    const postBackground = document.createElement('div');
+    postBackground.classList.add('modal-background', 'post-detail__background');
+    postBackground.addEventListener('click', () => wrapper.remove());
+    wrapper.append(postBackground);
+
+    const contents = `
+        <div class="modal-content post__modal-content p">
+            <div class="p__left-column">
+                <img src="/static/${postImagePath}" alt="Placeholder image" class="post__image post__image--lg">
+            </div>
+            <div class="p__right-column p__description description">
+                <div class="description__column-top description__user">
+                    <div>
+                        <img src="/static/${profileImagePath}" class="image is-48x48 description__user-picture">
+                    </div>
+                    <div class="description__user-info">
+                        <h5>@${username}</h5>
+                        <p>${nickname}</p>
+                    </div>
+
+                </div>
+                <div class="p__description__bottom-column">
+                    <p>${visitedDay}</p>
+                    <p>${title}을 드셨어요.</p>
+                    <p>${comment}</p>
+                </div>
+            </div>
+        </div>
+    `.trim();
+    wrapper.insertAdjacentHTML('beforeend', contents);
+
+    const closeButton = document.createElement('div');
+    closeButton.classList.add('modal-close', 'is-large', 'post-modal__close');
+    closeButton.addEventListener('click', () => wrapper.remove());
+    wrapper.append(closeButton);
+
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(wrapper);
+    document.querySelector('.user').appendChild(fragment);
+    return;
+    };
+    const deleteAccount = (username) => {
+    $.ajax({
+        type: "DELETE",
+        url:  `/user/${username}`,
+        data: {},
+        success: function (response) {
+            if (response.result === 'success') {
+                  $.removeCookie('mytoken', {path: '/'});
+                  alert(response.message);
+                  window.location.href = '/login';
+            }
+        }
+    });
+    }
+    const validateExtension = (event) => {
+    const that = event.currentTarget;
+    const extension = that.value.match(/\.([^\.]+)$/)[1];
+    switch (extension) {
+        case 'jpg':
+        case 'png':
+            break;
+        default:
+            alert('올바르지 않은 파일 확장자입니다. png 또는 jpg 파일을 등록해주세요.');
+            that.value = '';
+    }
+    }
+    const modifyUserInformation = (username) => {
+    const nickname = document.getElementById('setting__nick').value;
+    const [file] = document.getElementById('setting__profile-picture').files;
+
+    const formData = new FormData();
+    for (const data of [nickname, file]) {
+        if (!data) {
+            continue;
+        }
+        if (data instanceof File) {
+            formData.append('file_give', data)
+            continue;
+        }
+        formData.append('nick_give', data);
+    }
+
+    $.ajax({
+        type: "PATCH",
+        url: `/user/${username}`,
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function ({ result, msg }) {
+            if (result === 'success') {
+                alert(msg);
+                window.location.reload();
+            }
+        }
+    });
+    };
+</script>
+{% endblock %}
