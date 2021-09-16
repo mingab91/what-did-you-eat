@@ -133,8 +133,8 @@ def add_post():
             file = request.files["file_give"]
             filename = secure_filename(file.filename)
             extension = filename.split(".")[-1]
-            file_path = f"post_pics/{username}_{post_day}_{str(datetime.utcnow())}.{extension}"
-            # file_path = f"post_pics/{username}_{post_day}.{extension}"
+            # file_path = f"post_pics/{username}_{post_day}_{str(datetime.utcnow())}.{extension}"
+            file_path = f"post_pics/{username}_{post_day}.{extension}"
             file.save("./static/" + file_path)
 
             new_doc["post_pic"] = filename

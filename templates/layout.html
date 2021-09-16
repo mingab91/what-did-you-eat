@@ -15,15 +15,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
     <script src="https://kit.fontawesome.com/d755ebaf85.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../static/index.css">
 </head>
 <body>
     <section class="hero is-medium is-link">
         <div class="hero-body">
             <div class="container has-text-centered">
-                <h1 class="layout__title">뭐먹었니?</h1>
+                <h1 class="layout__title"><a href="#">뭐먹었니?</a></h1>
             </div>
         </div>
     </section>
+    <div class="logout-button"><a href="#">로그아웃</a></div>
     {%block content%}{% endblock %}
     </div>
     <script src="{{ url_for('static', filename='index.js') }}"></script>
