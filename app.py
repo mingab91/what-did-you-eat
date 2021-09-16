@@ -1,3 +1,4 @@
+import random
 from pymongo import MongoClient
 import jwt
 import datetime
@@ -19,15 +20,25 @@ app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 SECRET_KEY = SECRET_KEY
 client = MongoClient(IP, int(PORT))
 DBNAME = client.dbsparta_plus_week4
-db = DBNAME
+db = client.dbsparta_plus_week4
 
 @app.route('/')
 def home():
+    food_receive = request.args.get("food_give")
+    user = list(db.users.find({}))
+    for item in user:
+        item["_id"] = str(item["_id"])
+    random_user = random.sample(user, 3)
     token_receive = request.cookies.get('mytoken')
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-
-        return render_template('index.html')
+        user_info = db.users.find_one({"username": payload["id"]})
+        if food_receive == None:
+            posts = list(db.posts.find({}))
+            return render_template("index.html", list=posts, rec_user=random_user, user_info=user_info)
+        else:
+            search_result = list(db.posts.find({'post_title': food_receive}))
+            return render_template("index.html", list=search_result, rec_user=random_user, user_info=user_info)
     except jwt.ExpiredSignatureError:
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:

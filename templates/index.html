@@ -1,10 +1,168 @@
+<!--중요: 이 파일은 건들지 말아주세요. html파일을 새로 만들고,
+<DOCTYPE html>부터 마지막까지 전부 복사하신다음에 주석은 지워주세요. 그리고
+부분에 여러분의 html을 작성해주세요.
+
+자바스크립트 파일과 CSS 파일은 우선적으로 html 파일에 전부 작성하도록 합니다.
+CSS는 head의 맨 마지막에 style태그를 추가하여 작성해주세요.
+JAVASCRIPT는 body의 맨 마지막에 script 태그를 추가하여 작성해주세요.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>hello!</title>
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- needed to add favicon and og tags -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <link href="{{ url_for('static', filename='index.css') }}" rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script src="https://kit.fontawesome.com/d755ebaf85.js" crossorigin="anonymous"></script>
+    <style>
+        #main > div > div {
+            margin: 0 10px;
+        }
+        #main-left {
+
+        }
+
+        #main-left > div {
+
+        }
+        #main-right {
+            padding-top: 50px;
+            height: 600px;
+        }
+        #main-right > div {
+            height: 150px;
+        }
+
+        #main-right > div:nth-child(2) {
+            margin-top: -190px;
+        }
+
+        #main-right > div:nth-child(2) > p {
+            padding:0;
+            margin-bottom: 20px;
+        }
+
+        #header {
+            margin-bottom: 50px;
+        }
+
+        #rec_user {
+
+        }
+
+    </style>
 </head>
 <body>
+    <div id="root" class="container">
+        <nav class="navbar">
+            <div class="container">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="/">
+                        뭐먹었니?
+                    </a>
+                    <span class="navbar-burger" data-target="navbarMenuHeroA">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                </div>
+                <div id="navbarMenuHeroA" class="navbar-menu">
+                    <div class="navbar-end">
+                        <button class="navbar-item logout-button">
+                            로그아웃
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div id="header" class="container columns notification is-warning is-light">
+            <div class="container columns column is-9 is-offset-1 ">
+                <input id="search-bar" class="input is-rounded is-normal is-primary" type="search" placeholder="검색어를 입력해주세요">
+            </div>
+            <div class="container columns column is-2 is-centered">
+                <button class="button is-primary" onclick="find_food()"><i class="fad fa-search"></i></button>
+            </div>
+        </div>
+        <div id="main" class="container">
+            <div class="columns">
+                    <div id="main-left" class="columns column is-9 notification is-warning is-light is-multiline is-centered">
+                        {% for post in list %}
+                            <div class="columns column is-6 is-centered">
+                            <div class="card column is-11">
+                                <div class="card-image">
+                                    <figure class="image is-4by3">
+                                        <img src="{{ post.post_pic_real }}"
+                                             alt="{{ post.post_pic }}">
+                                    </figure>
+                                </div>
+                                <div class="card-content">
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <a href="/user/{{ post.username }}" class="image is-48x48">
+                                                <img src="{{ post.profile_pic_real }}"
+                                                     alt="Placeholder image">
+                                            </a>
+                                        </div>
+                                        <div class="media-content">
+                                            <a href="/user/{{ post.username }}" class="title is-4">{{ post.profile_name }}</a>
+                                            <a href="/user/{{ post.username }}" class="subtitle is-6">@{{ post.profile_name }}</a>
+                                        </div>
+                                    </div>
 
+                                    <div class="content">
+                                        {{ post.post_comment }}
+                                        <br>
+                                        <time datetime="2016-1-1">{{ post.post_date }}</time>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div id="main-right" class="columns column is-3 notification is-warning is-light is-multiline">
+                        <div class="columns column is-12 is-vcentered">
+                            <a href="/user/{{ user_info.username }}" class="image is-128x128 column is-7">
+                                <img src="static/{{ user_info.profile_pic_real }}" alt="default-image" class="is-rounded">
+                            </a>
+                            <div class="column is-5">
+                                <a href="/user/{{ user_info.username }}" class="has-text-black-bis"><strong>{{ user_info.profile_name }}</strong></a>
+                                <p class="has-text-grey-lighter">{{ user_info.profile_info }}</p>
+                            </div>
+                        </div>
+                        <div class="columns column is-12 is-centered is-multiline">
+                            <p class="column is-9">추천 사용자</p>
+                            <div id="rec_user" class="box column is-10">
+                                {% for user in rec_user %}
+                                    <div class="container columns is-vcentered">
+                                        <a href="/user/{{ user.username }}" class="image is-64x64 column is-7">
+                                            <img src="static/{{ user.profile_pic_real }}" alt="default-image" class="is-rounded">
+                                        </a>
+                                        <a href="/user/{{ user.username }}" class="column is-5">{{ user.profile_name }}</a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            {%block content%}{% endblock %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
+    <script>
+        function find_food() {
+           let food = $('#search-bar').val()
+           window.location.href = `/?food_give=${food}`
+       }
+    </script>
 </body>
 </html>

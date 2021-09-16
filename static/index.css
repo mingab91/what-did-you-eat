@@ -10,6 +10,10 @@ body i {
     font-family:'FontAwesome'!important;
 }
 
+a {
+    text-decoration:none; !important;
+}
+
 #root {
     height: 100%;
 }
