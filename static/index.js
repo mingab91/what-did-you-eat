@@ -27,6 +27,12 @@ function post() {
         return;
     }
 
+    const fileSize = file.size;
+    if (fileSize >= 2097152) {
+        alert('파일 크기는 2mb를 넘지 않아야 합니다.');
+        return;
+    }
+
     const formData = new FormData();
     const now = Date.now().toString();
 
