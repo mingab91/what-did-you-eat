@@ -133,6 +133,7 @@ def add_post():
         post_title = request.form['title_give']
         post_day = request.form['day_give']
         post_comment = request.form['comment_give']
+        now = request.form['now']
 
         new_doc = {
             "username": user_info['username'],
@@ -147,8 +148,7 @@ def add_post():
             file = request.files["file_give"]
             filename = secure_filename(file.filename)
             extension = filename.split(".")[-1]
-            #file_path = f"post_pics/{username}_{post_day}_{str(datetime.utcnow())}.{extension}"
-            file_path = f"post_pics/{username}_{post_day}.{extension}"
+            file_path = f"post_pics/{username}_{post_day}_{now}.{extension}"
             file.save("./static/" + file_path)
 
             new_doc["post_pic"] = filename

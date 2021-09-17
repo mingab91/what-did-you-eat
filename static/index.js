@@ -10,14 +10,14 @@ function post() {
     const file = $('#input-pic')[0].files[0];
     const comment = $("#comment-post").val();
     const day = $("#day-post").val();
-    console.log(title, file, comment, day);
-
     const formData = new FormData();
+    const now = Date.now().toString();
 
     formData.append("file_give", file);
     formData.append("title_give", title);
     formData.append("comment_give", comment);
     formData.append("day_give", day);
+    formData.append("now", now);
 
     $.ajax({
         type: "POST",
