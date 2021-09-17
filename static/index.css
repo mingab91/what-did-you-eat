@@ -15,9 +15,6 @@ body i {
 a {
     text-decoration:none!important;
 }
-.layout__header {
-    background-image: url("/header-bg.jpg");
-}
 
 .layout__nav {
     margin: 0!important;
@@ -187,6 +184,7 @@ a {
     display: flex;
     align-items: center;
 }
+
 .recommend__user .profile__image--small {
     margin-right: 0.5rem;
 }
@@ -197,6 +195,7 @@ a {
     margin-top: 2rem;
     position: relative;
 }
+
 .posting-button img {
     cursor: pointer;
     width: 64px;
@@ -205,7 +204,6 @@ a {
     top: 20px;
     left: 39%;
 }
-
 
 .profile__image.profile__image--small {
     border-radius: 5px;

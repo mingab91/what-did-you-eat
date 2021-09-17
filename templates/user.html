@@ -112,7 +112,6 @@
         </div>
     </section>
 </main>
-<script src="{{ url_for('static', filename='index.js') }}"></script>
 <script>
     const openPost = async (id) => {
     const response = await fetch(`/p/${id}`);
@@ -163,15 +162,16 @@
     wrapper.insertAdjacentHTML('beforeend', contents);
 
     const closeButton = document.createElement('div');
-    closeButton.classList.add('modal-close', 'is-large', 'post-modal__close');
-    closeButton.addEventListener('click', () => wrapper.remove());
-    wrapper.append(closeButton);
+        closeButton.classList.add('modal-close', 'is-large', 'post-modal__close');
+        closeButton.addEventListener('click', () => wrapper.remove());
+        wrapper.append(closeButton);
 
-    const fragment = document.createDocumentFragment();
-    fragment.appendChild(wrapper);
-    document.querySelector('.user').appendChild(fragment);
-    return;
+        const fragment = document.createDocumentFragment();
+        fragment.appendChild(wrapper);
+        document.querySelector('.user').appendChild(fragment);
+        return;
     };
+
     const deleteAccount = (username) => {
     $.ajax({
         type: "DELETE",
@@ -187,16 +187,16 @@
     });
     }
     const validateExtension = (event) => {
-    const that = event.currentTarget;
-    const extension = that.value.match(/\.([^\.]+)$/)[1];
-    switch (extension) {
-        case 'jpg':
-        case 'png':
-            break;
-        default:
-            alert('올바르지 않은 파일 확장자입니다. png 또는 jpg 파일을 등록해주세요.');
-            that.value = '';
-    }
+        const that = event.currentTarget;
+        const extension = that.value.match(/\.([^\.]+)$/)[1];
+        switch (extension) {
+            case 'jpg':
+            case 'png':
+                break;
+            default:
+                alert('올바르지 않은 파일 확장자입니다. png 또는 jpg 파일을 등록해주세요.');
+                that.value = '';
+        }
     }
     const modifyUserInformation = (username) => {
         const { value: nick_value } = document.getElementById('setting__nick');
