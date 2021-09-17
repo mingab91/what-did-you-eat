@@ -42,12 +42,6 @@ a {
     width: 80%;
 }
 
-
-.main__card {
-    border: 1px solid #dbdbdb;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-
 #post_icon {
     height: 75px;
     width: 75px;
@@ -81,9 +75,13 @@ a {
 }
 
 .main__card {
+    border: 1px solid #dbdbdb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     width: 450px;
     height: 520px;
+    border-radius: 15px;
 }
+
 .main__card-image {
     display: block;
     width: 100%;
@@ -91,11 +89,14 @@ a {
     margin-bottom: 2rem;
     overflow: hidden;
 }
+
 .main__card-image > img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 15px 15px 0 0
 }
+
 .main__card-content {
     padding: 1rem;
     display: flex;
@@ -125,6 +126,7 @@ a {
     display: flex;
     color: black;
 }
+
 .card-description__user {
     margin-bottom: 0.75rem;
 }

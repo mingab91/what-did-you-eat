@@ -29,7 +29,7 @@ function post() {
         success: function ({ result, msg }) {
             if (result === "success") {
                 alert(msg);
-                window.location.reload();
+                window.location.href= '/';
             }
         }
     });
