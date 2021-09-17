@@ -8,48 +8,61 @@
         <div class="main__inner">
             <div class="main__inner-left">
                 {% for post in list %}
-                <div class="main__card">
-                    <figure class="main__card-image">
-                        <img src="static/{{ post.post_pic_real }}"
-                             alt="{{ post.post_pic }}"
-                        >
-                    </figure>
-                    <div class="main__card-content card-content">
-                        <figure class="card-content__user-profile">
-                            <a href="/user/{{ post.username }}">
-                                <img src="static/{{ post.profile_pic_real }}"
-                                     alt="Placeholder image"
-                                     class="card-content__user-profile-image"
-                                >
-                            </a>
+                    {% if post.thumbs_by_me %}
+                        {% set class_thumbs = "fas" %}
+                    {% else %}
+                        {% set class_thumbs = "far" %}
+                    {% endif %}
+                    <div id="{{ post._id }}" class="main__card">
+                        <figure class="main__card-image">
+                            <img src="static/{{ post.post_pic_real }}"
+                                 alt="{{ post.post_pic }}"
+                            >
                         </figure>
-                        <div class="card-content__description card-description">
-                            <div class="card-description__user">
-                                <a
-                                    href="/user/{{ post.username }}"
-                                    class="user-description__nick"
-                                >
-                                    {{ post.profile_name }}
+                        <div class="main__card-content card-content">
+                            <figure class="card-content__user-profile">
+                                <a href="/user/{{ post.username }}">
+                                    <img src="static/{{ post.profile_pic_real }}"
+                                         alt="Placeholder image"
+                                         class="card-content__user-profile-image"
+                                    >
                                 </a>
-                                <a
-                                    href="/?food_give={{ post.post_title }}"
-                                    class="user-description__food-name"
-                                >
-                                    @{{ post.post_title }}
-                                </a>
-                            </div>
-
-                            <div class="card-content__post-info">
-                                <div class="card-content__post-comment">
-                                    {{ post.post_comment }}
+                            </figure>
+                            <div class="card-content__description card-description">
+                                <div class="card-description__user">
+                                    <a
+                                            href="/user/{{ post.username }}"
+                                            class="user-description__nick"
+                                    >
+                                        {{ post.profile_name }}
+                                    </a>
+                                    <a
+                                            href="/?food_give={{ post.post_title }}"
+                                            class="user-description__food-name"
+                                    >
+                                        @{{ post.post_title }}
+                                    </a>
                                 </div>
-                                <div class="card-content__date-time">
-                                    <time datetime="2016-1-1">{{ post.post_day }}</time>
+
+                                <div class="card-content__post-info">
+                                    <div class="card-content__post-comment">
+                                        {{ post.post_comment }}
+                                    </div>
+                                    <div class="card-content__date-time">
+                                        <time datetime="2016-1-1">{{ post.post_day }}</time>
+                                        <nav class="level is-mobile">
+                                            <div class="level-left">
+                                                <a class="level-item is-sparta" aria-label="thumbs" onclick="toggle_like('{{ post._id }}', 'thumbs')">
+                                                    <span class="icon is-small"><i class="{{ class_thumbs }} fa-thumbs-up"aria-hidden="true"></i></span>&nbsp;
+                                                    <span class="like-num">{{ post.count_thumbs }}</span>
+                                                </a>
+                                            </div>
+                                        </nav>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 {% endfor %}
             </div>
             <div class="main__inner-right">
@@ -62,8 +75,8 @@
                             >
                         </a>
                         <div>
-                            <a href="/user/{{ user_info.username }}" class="has-text-black-bis"><strong>{{
-                                user_info.profile_name }}</strong></a>
+                            <a href="/user/{{ user_info.username }}"
+                               class="has-text-black-bis"><strong>{{ user_info.profile_name }}</strong></a>
                             <p class="has-text-grey-lighter">{{ user_info.profile_info }}</p>
                         </div>
                     </div>
@@ -86,10 +99,10 @@
                 </div>
                 <div class="posting-button">
                     <img
-                        src="/static/posting-button.svg"
-                        id="posting-icon"
-                        alt="posting-image"
-                        onclick='$("#modal-post").addClass("is-active")'
+                            src="/static/posting-button.svg"
+                            id="posting-icon"
+                            alt="posting-image"
+                            onclick='$("#modal-post").addClass("is-active")'
                     >
                 </div>
             </div>
@@ -108,12 +121,12 @@
                                         <div class="file has-name">
                                             <label class="file-label" style="width:100%">
                                                 <input
-                                                    id="input-pic"
-                                                    class="file-input"
-                                                    type="file"
-                                                    accept=".png, .jpg, image/png, image/jpg"
-                                                    name="resume"
-                                                    onchange="validateExtension(event)"
+                                                        id="input-pic"
+                                                        class="file-input"
+                                                        type="file"
+                                                        accept=".png, .jpg, image/png, image/jpg"
+                                                        name="resume"
+                                                        onchange="validateExtension(event)"
                                                 >
                                                 <span class="file-cta">
                                                     <span class="file-icon"><i class="fa fa-upload"></i></span>

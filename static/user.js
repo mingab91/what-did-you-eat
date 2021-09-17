@@ -120,7 +120,10 @@
             }
         });
     };
-
+$('.logout-button').on('click', () => {
+    $.removeCookie('mytoken', {path: '/'});
+    window.location.href = '/login'
+});
     // REMAININGTASK: 업데이트 로직 구현.
     // document.querySelector('.post__heart-icon')
     //     .addEventListener('click', () => { console.log('hello'); });

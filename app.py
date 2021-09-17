@@ -54,11 +54,16 @@ def home():
         if food_receive == None:
             # 최근순으로 작성되어지는 포스트 솔팅해서 구현.
             posts = list(db.posts.find({}))
+            for post in posts:
+                post['_id'] = str(post['_id'])
+                post["count_thumbs"] = db.likes.count_documents({"post_id": post["_id"], "type": "thumbs"})
+                post["thumbs_by_me"] = bool(db.likes.find_one({"post_id": post["_id"], "type": "thumbs", "username": payload['id']}))
             return render_template("index.html", list=posts, rec_user=random_user, user_info=user_info)
         else:
             # 최근순으로 작성되어지는 포스트 솔팅하기.
             search_result = list(db.posts.find({'post_title': food_receive}))
-
+            for post in search_result:
+                post['_id'] = str(post['_id'])
             return render_template("index.html", list=search_result, rec_user=random_user, user_info=user_info)
     except jwt.ExpiredSignatureError:
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
@@ -177,6 +182,7 @@ def user(username):
         for post in posts_info:
             print(str(post["_id"]))
             post["_id"] = str(post["_id"])
+            post["count_thumbs"] = db.likes.count_documents({"post_id": post["_id"], "type": "thumbs"})
 
         return render_template('user.html', user_info=user_info, status=status, posts_info=posts_info)
     except jwt.ExpiredSignatureError:
@@ -271,6 +277,30 @@ def get_post_detail(post_id):
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+@app.route('/update_like', methods=['POST'])
+def update_like():
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        # 좋아요 수 변경
+        user_info = db.users.find_one({"username": payload["id"]})
+        post_id_receive = request.form["post_id_give"]
+        type_receive = request.form["type_give"]
+        action_receive = request.form["action_give"]
+        doc = {
+            "post_id": post_id_receive,
+            "username": user_info["username"],
+            "type": type_receive
+        }
+        if action_receive == "like":
+            db.likes.insert_one(doc)
+        else:
+            db.likes.delete_one(doc)
+        count = db.likes.count_documents({"post_id": post_id_receive, "type": type_receive})
+        return jsonify({"result": "success", 'msg': 'updated', "count": count})
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        return redirect(url_for("home"))
 
 
 if __name__ == '__main__':

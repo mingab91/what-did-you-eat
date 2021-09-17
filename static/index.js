@@ -1,3 +1,41 @@
+function toggle_like(post_id, type) {
+    console.log(post_id, type)
+    let $a_like = $(`#${post_id} a[aria-label='thumbs']`)
+    let $i_like = $a_like.find("i")
+    if ($i_like.hasClass("fas")) {
+        $.ajax({
+            type: "POST",
+            url: "/update_like",
+            data: {
+                post_id_give: post_id,
+                type_give: type,
+                action_give: "unlike"
+            },
+            success: function (response) {
+                console.log("unlike")
+                $i_like.addClass("far").removeClass("fas")
+                $a_like.find("span.like-num").text(response["count"])
+            }
+        })
+    } else {
+        $.ajax({
+            type: "POST",
+            url: "/update_like",
+            data: {
+                post_id_give: post_id,
+                type_give: type,
+                action_give: "like"
+            },
+            success: function (response) {
+                console.log("like")
+                $i_like.addClass("fas").removeClass("far")
+                $a_like.find("span.like-num").text(response["count"])
+            }
+        })
+
+    }
+}
+
 const validateExtension = (event) => {
     const that = event.currentTarget;
     const extension = that.value.match(/\.([^\.]+)$/)[1];
