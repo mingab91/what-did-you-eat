@@ -45,6 +45,7 @@ def home():
 
     food_receive = request.args.get("food_give")
     user = list(db.users.find({}))
+
     for item in user:
         item["_id"] = str(item["_id"])
     random_user = random.sample(user, 3)
@@ -52,7 +53,6 @@ def home():
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         user_info = db.users.find_one({"username": payload["id"]})
         if food_receive == None:
-            # 최근순으로 작성되어지는 포스트 솔팅해서 구현.
             posts = list(db.posts.find({}))
             for post in posts:
                 post['_id'] = str(post['_id'])
@@ -60,7 +60,6 @@ def home():
                 post["thumbs_by_me"] = bool(db.likes.find_one({"post_id": post["_id"], "type": "thumbs", "username": payload['id']}))
             return render_template("index.html", list=posts, rec_user=random_user, user_info=user_info)
         else:
-            # 최근순으로 작성되어지는 포스트 솔팅하기.
             search_result = list(db.posts.find({'post_title': food_receive}))
             for post in search_result:
                 post['_id'] = str(post['_id'])
@@ -92,7 +91,7 @@ def sign_in():
     if result is not None:
         payload = {
          'id': username_receive,
-         'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
+         'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
 
@@ -167,6 +166,34 @@ def add_post():
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
 
+@app.route('/update_like', methods=['POST'])
+def update_like():
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        user_info = db.users.find_one({"username": payload["id"]})
+        post_id_receive = request.form["post_id_give"]
+        type_receive = request.form["type_give"]
+        action_receive = request.form["action_give"]
+
+        doc = {
+            "post_id": post_id_receive,
+            "username": user_info["username"],
+            "type": type_receive
+        }
+
+        if action_receive == "like":
+            db.likes.insert_one(doc)
+        else:
+            db.likes.delete_one(doc)
+        count = db.likes.count_documents({"post_id": post_id_receive, "type": type_receive})
+        return jsonify({"result": "success", 'msg': 'updated', "count": count})
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+
+
 @app.route('/user/<username>', methods=['GET'])
 def user(username):
     token_receive = request.cookies.get('mytoken')
@@ -180,9 +207,13 @@ def user(username):
 
         posts_info = list(db.posts.find({"username": username}).sort("date", -1).limit(20))
         for post in posts_info:
-            print(str(post["_id"]))
             post["_id"] = str(post["_id"])
             post["count_thumbs"] = db.likes.count_documents({"post_id": post["_id"], "type": "thumbs"})
+            post["thumbs_by_me"] = bool(db.likes.find_one({
+                "post_id": post["_id"],
+                "type": "thumbs",
+                "username": payload['id']
+            }))
 
         return render_template('user.html', user_info=user_info, status=status, posts_info=posts_info)
     except jwt.ExpiredSignatureError:
@@ -258,13 +289,11 @@ def get_post_detail(post_id):
         try:
             post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})
             is_valid_user = True if (post['username'] == payload['id']) else False
-
             return jsonify({
                 'user': user,
                 'post': post,
-                'status': is_valid_user
+                'status': is_valid_user,
             })
-
         except:
             abort(404)
 
@@ -274,33 +303,60 @@ def get_post_detail(post_id):
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
 
+@app.route('/p/<post_id>', methods=['PATCH'])
+def update_comment(post_id):
+    token_receive = request.cookies.get('mytoken')
+    updated_comment = request.form.get('comment_give')
+    post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        if post['username'] == payload['id']:
+            db.posts.update_one({'_id': ObjectId(post_id)}, {'$set': {
+                'post_comment': updated_comment
+            }})
+            return jsonify({
+                'result': 'success',
+                'msg': '성공적으로 수정이 완료되었습니다.'
+            })
+        else:
+            return jsonify({
+                'result': 'failure',
+                'msg': '올바르지 않은 접근입니다. 관리자에게 문의해주세요.'
+            })
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+
+
+@app.route('/p/<post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    token_receive = request.cookies.get('mytoken')
+    post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})
+    user_id = post['username']
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        if post['username'] == payload['id']:
+            db.posts.delete_one({'username': user_id})
+            return jsonify({
+                'result': 'success',
+                'msg': '성공적으로 삭제가 완료되었습니다.',
+                'userId': user_id
+            })
+        else:
+            return jsonify({
+                'result': 'failure',
+                'msg': '올바르지 않은 접근입니다. 관리자에게 문의해주세요.'
+            })
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
-
-@app.route('/update_like', methods=['POST'])
-def update_like():
-    token_receive = request.cookies.get('mytoken')
-    try:
-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        # 좋아요 수 변경
-        user_info = db.users.find_one({"username": payload["id"]})
-        post_id_receive = request.form["post_id_give"]
-        type_receive = request.form["type_give"]
-        action_receive = request.form["action_give"]
-        doc = {
-            "post_id": post_id_receive,
-            "username": user_info["username"],
-            "type": type_receive
-        }
-        if action_receive == "like":
-            db.likes.insert_one(doc)
-        else:
-            db.likes.delete_one(doc)
-        count = db.likes.count_documents({"post_id": post_id_receive, "type": type_receive})
-        return jsonify({"result": "success", 'msg': 'updated', "count": count})
-    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
-        return redirect(url_for("home"))
 
 
 if __name__ == '__main__':

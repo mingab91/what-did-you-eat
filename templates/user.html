@@ -82,16 +82,22 @@
 
                 </div>
                 <div
-                        class="modal-close setting__close-button"
-                        onclick="$('#setting').removeClass('is-active')"
-                ></div>
+                    class="modal-close setting__close-button"
+                    onclick="$('#setting').removeClass('is-active')"
+                >
+                </div>
             </div>
             {% endif %}
     </article>
     <section class="user__post">
         <div class="user__post-container">
             {% for post in posts_info %}
-                <div class="user__post-card card">
+                {% if post.thumbs_by_me %}
+                    {% set class_thumbs = "fas" %}
+                {% else %}
+                    {% set class_thumbs = "far" %}
+                {% endif %}
+                <div id="{{ post._id }}" class="user__post-card card">
                     <div class="card-image">
                     <img src="/static/{{post['post_pic_real']}}" alt="Placeholder image" class="post__image">
                     </div>
@@ -99,11 +105,15 @@
                         <div class="level-item has-text-centered">
                             <div>
                                 <p>
-                                    <span class="icon is-medium post__heart-icon">
-                                        <i class="fa fa-heart" aria-hidden="true"></i>
+                                    <span class="icon is-medium post__thumb-icon">
+                                        <i
+                                            class="{{ class_thumbs }} fa-thumbs-up fa-2x"
+                                            aria-hidden="true"
+                                        >
+                                        </i>
+                                        <span class="like-num">{{ post.count_thumbs }}</span>
                                     </span>
                                 </p>
-                                <p>{{ post.count_thumbs }}</p>
                             </div>
                         </div>
                     </nav>

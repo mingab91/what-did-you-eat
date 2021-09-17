@@ -1,7 +1,7 @@
 function toggle_like(post_id, type) {
-    console.log(post_id, type)
-    let $a_like = $(`#${post_id} a[aria-label='thumbs']`)
-    let $i_like = $a_like.find("i")
+    let $a_like = $(`#${post_id} a[aria-label='thumbs']`);
+    let $i_like = $a_like.find("i");
+
     if ($i_like.hasClass("fas")) {
         $.ajax({
             type: "POST",
@@ -12,11 +12,10 @@ function toggle_like(post_id, type) {
                 action_give: "unlike"
             },
             success: function (response) {
-                console.log("unlike")
                 $i_like.addClass("far").removeClass("fas")
                 $a_like.find("span.like-num").text(response["count"])
             }
-        })
+        });
     } else {
         $.ajax({
             type: "POST",
@@ -27,12 +26,10 @@ function toggle_like(post_id, type) {
                 action_give: "like"
             },
             success: function (response) {
-                console.log("like")
                 $i_like.addClass("fas").removeClass("far")
                 $a_like.find("span.like-num").text(response["count"])
             }
-        })
-
+        });
     }
 }
 
@@ -95,6 +92,30 @@ function post() {
         }
     });
 }
+
+(function toggling() {
+    const postingIcon = document.getElementById('posting-icon');
+    const mainInnerLeft = document.querySelector('.main__inner-left');
+    if (!(postingIcon && mainInnerLeft)) {
+        return;
+    }
+
+    document.addEventListener('scroll', () => {
+        const offsetTop = mainInnerLeft.lastElementChild.offsetTop;
+        const scrollY = window.scrollY;
+
+        if (!scrollY) {
+            postingIcon.style.top = '20px';
+            return;
+        }
+
+        if (scrollY >= offsetTop) {
+            postingIcon.style.top = `${offsetTop}px`;
+        } else {
+            postingIcon.style.top = `${scrollY - 75}px`;
+        }
+    });
+}());
 
 
 $('.logout-button').on('click', () => {
