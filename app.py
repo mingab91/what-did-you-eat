@@ -6,6 +6,8 @@ from bson.objectid import ObjectId
 import jwt
 import datetime
 import hashlib
+import time
+
 from flask import Flask, render_template, jsonify, request, redirect, url_for, abort
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
@@ -13,18 +15,20 @@ from decouple import config
 
 
 SECRET_KEY = config('SECRET_KEY')
-IP = config('IP')
+MONGO_ADDRESS = config('ADDRESS')
 PORT = config('DB_PORT')
+ADMIN_NAME = config('ADMIN_NAME')
+ADMIN_PASSWORD = config('ADMIN_PASSWORD')
+
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 
 SECRET_KEY = SECRET_KEY
-client = MongoClient(IP, int(PORT))
 
-DBNAME = client.dbsparta_plus_week4
-db = client.dbsparta_plus_week4
+client = MongoClient(MONGO_ADDRESS, PORT, username=ADMIN_NAME, password=ADMIN_PASSWORD)
+db = client.foodiary
 
 
 class MyEncoder(json.JSONEncoder):
@@ -52,15 +56,15 @@ def home():
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         user_info = db.users.find_one({"username": payload["id"]})
-        if food_receive == None:
-            posts = list(db.posts.find({}))
+        if food_receive is None:
+            posts = list(db.posts.find({}).sort("upload_time", -1).limit(20))
             for post in posts:
                 post['_id'] = str(post['_id'])
                 post["count_thumbs"] = db.likes.count_documents({"post_id": post["_id"], "type": "thumbs"})
                 post["thumbs_by_me"] = bool(db.likes.find_one({"post_id": post["_id"], "type": "thumbs", "username": payload['id']}))
             return render_template("index.html", list=posts, rec_user=random_user, user_info=user_info)
         else:
-            search_result = list(db.posts.find({'post_title': food_receive}))
+            search_result = list(db.posts.find({'post_title': food_receive}).sort("date", -1).limit(20))
             for post in search_result:
                 post['_id'] = str(post['_id'])
             return render_template("index.html", list=search_result, rec_user=random_user, user_info=user_info)
@@ -145,7 +149,8 @@ def add_post():
             "profile_pic_real": user_info['profile_pic_real'],
             "post_title": post_title,
             "post_day": post_day,
-            "post_comment": post_comment
+            "post_comment": post_comment,
+            "upload_time": round(time.time() * 1000)
         }
 
         if 'file_give' in request.files:

@@ -120,6 +120,9 @@ function modifyUserInformation (username) {
 }
 
 function openModifier (postId) {
+    if (document.querySelector('.modifier__wrapper')) {
+        return;
+    }
     const comment = document.querySelector('.description__comment');
     const parent = document.querySelector('.p__description__column-bottom');
     const wrapper = document.createElement('div');

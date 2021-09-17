@@ -109,11 +109,11 @@ a {
     height: 128px;
     margin-right: 2rem;
 }
-
 .card-content__user-profile-image {
     width: 128px;
-    heigh: 128px;
-    border-radius: 10px;
+    height: 128px;
+    object-fit: cover;
+    border-radius: 20px;
 }
 
 .card-description {
