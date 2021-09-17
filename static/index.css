@@ -78,8 +78,9 @@ a {
     border: 1px solid #dbdbdb;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     width: 450px;
-    height: 520px;
+    height:465px;
     border-radius: 15px;
+
 }
 
 .main__card-image {
@@ -98,7 +99,7 @@ a {
 }
 
 .main__card-content {
-    padding: 1rem;
+    padding: 0 2rem 2rem 2rem;
     display: flex;
     align-items: center;
 }
@@ -138,6 +139,8 @@ a {
 
 .user-description__food-name {
     color: #ff9999;
+    padding-left: 10px;
+    font-size: 1.2rem;
 }
 
 .card-content__post-comment {
@@ -149,6 +152,7 @@ a {
      padding: 1rem;
      border: 1px solid #dbdbdb;
      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+     border-radius:15px
  }
 
 .main__profile-wrapper {

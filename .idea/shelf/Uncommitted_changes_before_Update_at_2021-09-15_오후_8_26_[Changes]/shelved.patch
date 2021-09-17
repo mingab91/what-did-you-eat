@@ -1,0 +1,19 @@
+Index: app.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from pymongo import MongoClient\r\nimport jwt\r\nimport datetime\r\nimport hashlib\r\nfrom flask import Flask, render_template, jsonify, request, redirect, url_for\r\nfrom werkzeug.utils import secure_filename\r\nfrom datetime import datetime, timedelta\r\nfrom decouple import config\r\n\r\n\r\nSECRET_KEY = config('SECRET_KEY')\r\nIP = config('IP')\r\nPORT = config('DB_PORT')\r\nDBNAME = config('DBNAME')\r\n\r\napp = Flask(__name__)\r\napp.config[\"TEMPLATES_AUTO_RELOAD\"] = True\r\napp.config['UPLOAD_FOLDER'] = \"./static/profile_pics\"\r\n\r\nSECRET_KEY = SECRET_KEY\r\nclient = MongoClient(IP, int(PORT))\r\ndb = DBNAME\r\n\r\n\r\n@app.route('/')\r\ndef home():\r\n    return render_template('layout.html')\r\n\r\n\r\n@app.route('/mypage')\r\ndef asd():\r\n    return '민갑입니다.'\r\n\r\n\r\nif __name__ == '__main__':\r\n   app.run('0.0.0.0', port=5000, debug=True)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app.py b/app.py
+--- a/app.py	(revision 18203305945aa255b38248697e6e4c0cf1e2624b)
++++ b/app.py	(date 1631672754568)
+@@ -19,7 +19,7 @@
+ 
+ SECRET_KEY = SECRET_KEY
+ client = MongoClient(IP, int(PORT))
+-db = DBNAME
++db = client.dbsparta_plus_week4
+ 
+ 
+ @app.route('/')
