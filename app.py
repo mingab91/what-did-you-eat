@@ -26,13 +26,16 @@ client = MongoClient(IP, int(PORT))
 DBNAME = client.dbsparta_plus_week4
 db = client.dbsparta_plus_week4
 
+
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, bytes):
             return str(obj, encoding='utf-8');
         return json.JSONEncoder.default(self, obj)
 
+
 app.json_encoder = MyEncoder
+
 
 @app.route('/')
 def home():
@@ -152,7 +155,7 @@ def add_post():
             new_doc["post_pic_real"] = file_path
 
         db.posts.insert_one(new_doc)
-        return jsonify({"result": "success", 'msg': '프로필을 업데이트했습니다.'})
+        return jsonify({"result": "success", 'msg': '게시물 등록이 완료되었어요!'})
     except jwt.ExpiredSignatureError:
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
@@ -188,8 +191,10 @@ def update_user(username):
             nick_receive = request.form.get('nick_give')
             about_receive = request.form.get('about_give')
 
-            if nick_receive: new_doc['profile_name'] = nick_receive
-            if about_receive: new_doc['profile_info'] = about_receive
+            if nick_receive:
+                new_doc['profile_name'] = nick_receive
+            if about_receive:
+                new_doc['profile_info'] = about_receive
 
             if 'file_give' in request.files:
                 file = request.files["file_give"]
@@ -224,11 +229,11 @@ def delete_user(username):
             db.users.delete_one({'username': username})
             db.posts.delete_many({'username': username})
 
-            return jsonify({'result': 'success', 'message': '그동안 저희 서비스를 이용해주셔서 감사했습니다'})
+            return jsonify({'result': 'success', 'message': '그동안 저희 서비스를 이용해주셔서 감사했습니다'}), 200
         else:
             return jsonify({'result': 'failure', 'message': '올르지 않은 접근입니다'}), 403
     except jwt.ExpiredSignatureError:
-            return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
@@ -247,9 +252,9 @@ def get_post_detail(post_id):
             'status': is_valid_user
         })
     except jwt.ExpiredSignatureError:
-            return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
-            return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
 
 if __name__ == '__main__':

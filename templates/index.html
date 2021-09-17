@@ -2,7 +2,7 @@
 {% block content %}
     <div id="main" class="container">
         <div class="search-header">
-            <input class="input search__input" type="search" placeholder="검색어를 입력해주세요">
+            <input id="search-bar" class="input search__input" type="search" placeholder="검색어를 입력해주세요">
             <button class="button is-sparta" onclick="find_food()"><i class="fad fa-search"></i></button>
         </div>
         <div class="main__inner">
@@ -26,8 +26,8 @@
                         <div class="card-content__description card-description">
                             <div class="card-description__user">
                                 <a
-                                        href="/user/{{ post.username }}"
-                                        class="user-description__nick"
+                                    href="/user/{{ post.username }}"
+                                    class="user-description__nick"
                                 >
                                     {{ post.profile_name }}
                                 </a>
