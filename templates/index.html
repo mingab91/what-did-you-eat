@@ -1,77 +1,113 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div id="header" class="container columns notification">
-        <div class="container columns column is-9 is-offset-1 ">
-            <input id="search-bar" class="input is-rounded is-normal is-primary" type="search" placeholder="검색어를 입력해주세요">
-        </div>
-        <div class="container columns column is-2 is-centered">
-            <button class="button is-primary" onclick="find_food()"><i class="fad fa-search"></i></button>
-        </div>
-    </div>
     <div id="main" class="container">
-        <div class="columns">
-                <div id="main-left" class="columns column is-9 notification is-warning is-light is-multiline is-centered">
-                    {% for post in list %}
-                                        <div class="columns column is-6 is-centered">
-                <div class="card column is-11">
-                    <div class="card-image">
-                        <figure class="image is-4by3">
-                            <img src="static/{{ post.post_pic_real }}"
-                                 alt="{{ post.post_pic }}">
+        <div class="search-header">
+            <input class="input search__input" type="search" placeholder="검색어를 입력해주세요">
+            <button class="button is-sparta" onclick="find_food()"><i class="fad fa-search"></i></button>
+        </div>
+        <div class="main__inner">
+            <div class="main__inner-left">
+                {% for post in list %}
+                <div class="main__card">
+                    <figure class="main__card-image">
+                        <img src="static/{{ post.post_pic_real }}"
+                             alt="{{ post.post_pic }}"
+                        >
+                    </figure>
+                    <div class="main__card-content card-content">
+                        <figure class="card-content__user-profile">
+                            <a href="/user/{{ post.username }}">
+                                <img src="static/{{ post.profile_pic_real }}"
+                                     alt="Placeholder image"
+                                     class="card-content__user-profile-image"
+                                >
+                            </a>
                         </figure>
-                    </div>
-                    <div class="card-content">
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="/user/{{ post.username }}" class="image is-48x48">
-                                    <img src="static/{{ post.profile_pic_real }}"
-                                         alt="Placeholder image">
+                        <div class="card-content__description card-description">
+                            <div class="card-description__user">
+                                <a
+                                        href="/user/{{ post.username }}"
+                                        class="user-description__nick"
+                                >
+                                    {{ post.profile_name }}
+                                </a>
+                                <a
+                                    href="/?food_give={{ post.post_title }}"
+                                    class="user-description__food-name"
+                                >
+                                    @{{ post.post_title }}
                                 </a>
                             </div>
-                            <div class="media-content">
-                                <a href="/user/{{ post.username }}" class="title is-4">{{ post.profile_name }}</a>
-                                <a href="/?food_give={{ post.post_title }}" class="subtitle is-6">@{{ post.post_title }}</a>
-                            </div>
-                        </div>
 
-                        <div class="content">
-                            {{ post.post_comment }}
-                            <br>
-                            <time datetime="2016-1-1">{{ post.post_day }}</time>
+                            <div class="card-content__post-info">
+                                <div class="card-content__post-comment">
+                                    {{ post.post_comment }}
+                                </div>
+                                <div class="card-content__date-time">
+                                    <time datetime="2016-1-1">{{ post.post_day }}</time>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-
-                    {% endfor %}
-                </div>
-                <div id="main-right" class="columns column is-3 notification is-warning is-light is-multiline">
-                    <div class="columns column is-12 is-vcentered">
-                        <a href="/user/{{ user_info.username }}" class="image is-128x128 column is-5">
-                            <img src="static/{{ user_info.profile_pic_real }}" alt="default-image" class="is-rounded profile__image">
+            <div class="main__inner-right">
+                <div id="main__navigator">
+                    <div class="main__profile-wrapper">
+                        <a href="/user/{{ user_info.username }}" class="">
+                            <img src="static/{{ user_info.profile_pic_real }}"
+                                 alt="default-image"
+                                 class="image main__profile-image"
+                            >
                         </a>
-                        <div class="column is-1">
-                            <a href="/user/{{ user_info.username }}" class="has-text-black-bis"><strong>{{ user_info.profile_name }}</strong></a>
+                        <div>
+                            <a href="/user/{{ user_info.username }}" class="has-text-black-bis"><strong>{{
+                                user_info.profile_name }}</strong></a>
                             <p class="has-text-grey-lighter">{{ user_info.profile_info }}</p>
                         </div>
                     </div>
-                    <div class="columns column is-12 is-centered is-multiline">
-                        <p class="column is-9">추천 사용자</p>
-                        <div id="rec_user" class="box column is-10">
+                    <div class="main__recommend recommend">
+                        <p class="recommend__title">
+                            추천 사용자
+                        </p>
+                        <ul class="recommend__list">
                             {% for user in rec_user %}
-                                <div class="container columns is-vcentered">
-                                    <a href="/user/{{ user.username }}" class="column is-3">
-                                        <img src="static/{{ user.profile_pic_real }}" alt="default-image" class="profile__image profile__image--small">
+                                <li class="recommend__user">
+                                    <a href="/user/{{ user.username }}">
+                                        <img src="static/{{ user.profile_pic_real }}" alt="default-image"
+                                             class="profile__image profile__image--small">
                                     </a>
-                                    <a href="/user/{{ user.username }}" class="column is-5">{{ user.profile_name }}</a>
-                                </div>
+                                    <a href="/user/{{ user.username }}">{{ user.profile_name }}</a>
+                                </li>
                             {% endfor %}
-                        </div>
+                        </ul>
                     </div>
-                    <button class="button is-danger" onclick='$("#modal-post").addClass("is-active")'><img
-                            src="../static/insta_posting_img.png" alt=""></button>
-
                 </div>
+                <div
+                        class="posting-button"
+                        onclick='$("#modal-post").addClass("is-active")'
+                >
+                    <img src="/static/posting-button.svg" id="posting-icon" alt="posting-image">
+                </div>
+
+<!--                <div class="columns column is-12 is-centered is-multiline">-->
+<!--                    <p class="column is-9">추천 사용자</p>-->
+<!--                    <div id="rec_user" class="box column is-10">-->
+<!--                        {% for user in rec_user %}-->
+<!--                        <div class="container columns is-vcentered">-->
+<!--                            <a href="/user/{{ user.username }}" class="column is-3">-->
+<!--                                <img src="static/{{ user.profile_pic_real }}" alt="default-image"-->
+<!--                                     class="profile__image profile__image&#45;&#45;small">-->
+<!--                            </a>-->
+<!--                            <a href="/user/{{ user.username }}" class="column is-5">{{ user.profile_name }}</a>-->
+<!--                        </div>-->
+<!--                        {% endfor %}-->
+<!--                    </div>-->
+<!--                </div>-->
+
+
+            </div>
         </div>
         <div class="modal" id="modal-post">
             <div class="modal-background" onclick='$("#modal-post").removeClass("is-active")'></div>
@@ -137,5 +173,4 @@
                     onclick='$("#modal-post").removeClass("is-active")'></button>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='index.js') }}"></script>
 {% endblock %}

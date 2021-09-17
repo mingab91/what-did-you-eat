@@ -19,7 +19,7 @@ PORT = config('DB_PORT')
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
-#client = MongoClient('mongodb://54.180.137.109', 27017, username="test", password="1234")
+
 SECRET_KEY = SECRET_KEY
 client = MongoClient(IP, int(PORT))
 
@@ -71,6 +71,7 @@ def login():
         return redirect(url_for("home"))
     else:
         return render_template('login.html', msg=msg)
+
 
 @app.route('/sign_in', methods=['POST'])
 def sign_in():
@@ -157,7 +158,8 @@ def add_post():
     except jwt.exceptions.DecodeError:
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
-@app.route('/user/<username>')
+
+@app.route('/user/<username>', methods=['GET'])
 def user(username):
     token_receive = request.cookies.get('mytoken')
     try:
@@ -183,8 +185,11 @@ def update_user(username):
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         if payload['id'] == username:
             new_doc = {}
-            nick_receive = request.form['nick_give']
+            nick_receive = request.form.get('nick_give')
+            about_receive = request.form.get('about_give')
+
             if nick_receive: new_doc['profile_name'] = nick_receive
+            if about_receive: new_doc['profile_info'] = about_receive
 
             if 'file_give' in request.files:
                 file = request.files["file_give"]
@@ -196,7 +201,10 @@ def update_user(username):
 
                 new_doc["profile_pic"] = filename
                 new_doc["profile_pic_real"] = file_path
-
+                db.posts.update_many({'username': username}, {'$set': {
+                    "profile_pic": filename,
+                    "profile_pic_real": file_path
+                }})
             db.users.update_one({'username': username}, {'$set': new_doc})
             return jsonify({'result': 'success', 'msg': '정상적으로 수정이 완료되었습니다!'}), 200
         else:
@@ -205,6 +213,7 @@ def update_user(username):
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+
 
 @app.route('/user/<username>', methods=['DELETE'])
 def delete_user(username):
