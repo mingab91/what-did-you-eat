@@ -1,3 +1,4 @@
+import json
 import random
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -18,11 +19,20 @@ PORT = config('DB_PORT')
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
-
+#client = MongoClient('mongodb://54.180.137.109', 27017, username="test", password="1234")
 SECRET_KEY = SECRET_KEY
 client = MongoClient(IP, int(PORT))
+
 DBNAME = client.dbsparta_plus_week4
 db = client.dbsparta_plus_week4
+
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, bytes):
+            return str(obj, encoding='utf-8');
+        return json.JSONEncoder.default(self, obj)
+
+app.json_encoder = MyEncoder
 
 @app.route('/')
 def home():
@@ -133,7 +143,7 @@ def add_post():
             file = request.files["file_give"]
             filename = secure_filename(file.filename)
             extension = filename.split(".")[-1]
-            # file_path = f"post_pics/{username}_{post_day}_{str(datetime.utcnow())}.{extension}"
+            #file_path = f"post_pics/{username}_{post_day}_{str(datetime.utcnow())}.{extension}"
             file_path = f"post_pics/{username}_{post_day}.{extension}"
             file.save("./static/" + file_path)
 
