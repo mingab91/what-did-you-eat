@@ -15,12 +15,12 @@
                         <div>
                             <span class="profile__user-about">{{user_info['profile_info']}}</span>
                             {% if status %}
-                            <span
-                                class="profile__navigation"
-                                onclick="$('#setting').addClass('is-active')"
-                            >
-                                <i class="fas fa-cog"></i>
-                            </span>
+                                <span
+                                    class="profile__navigation"
+                                    onclick="$('#setting').addClass('is-active')"
+                                >
+                                    <i class="fas fa-cog"></i>
+                                </span>
                             {% endif %}
                         </div>
                     </div>
@@ -66,12 +66,13 @@
                         <div class="field setting__field is-grouped">
                             <div class="setting__buttons">
                                 <button class="button setting__delete is-danger"
-                                        onclick="deleteAccount('{{user_info.username}}')">
+                                        onclick="deleteAccount('{{user_info.username}}')"
+                                >
                                     탈퇴하기
                                 </button>
                                 <button
-                                        class="button setting__save-button is-primary"
-                                        onclick="modifyUserInformation('{{user_info.username}}')"
+                                    class="button setting__save-button is-primary"
+                                    onclick="modifyUserInformation('{{user_info.username}}')"
                                 >
                                     제출하기
                                 </button>

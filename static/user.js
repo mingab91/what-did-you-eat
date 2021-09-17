@@ -57,18 +57,18 @@
     };
 
     const deleteAccount = (username) => {
-    $.ajax({
-        type: "DELETE",
-        url:  `/user/${username}`,
-        data: {},
-        success: function (response) {
-            if (response.result === 'success') {
-                  $.removeCookie('mytoken', {path: '/'});
-                  alert(response.message);
-                  window.location.href = '/login';
+        $.ajax({
+            type: "DELETE",
+            url:  `/user/${username}`,
+            data: {},
+            success: function (response) {
+                if (response.result === 'success') {
+                      $.removeCookie('mytoken', {path: '/'});
+                      alert(response.message);
+                      window.location.href = '/login';
+                }
             }
-        }
-    });
+        });
     }
     const validateExtension = (event) => {
         const that = event.currentTarget;
@@ -120,6 +120,7 @@
             }
         });
     };
+
     // REMAININGTASK: 업데이트 로직 구현.
     // document.querySelector('.post__heart-icon')
     //     .addEventListener('click', () => { console.log('hello'); });

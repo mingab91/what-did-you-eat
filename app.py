@@ -6,7 +6,7 @@ from bson.objectid import ObjectId
 import jwt
 import datetime
 import hashlib
-from flask import Flask, render_template, jsonify, request, redirect, url_for
+from flask import Flask, render_template, jsonify, request, redirect, url_for, abort
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from decouple import config
@@ -169,6 +169,10 @@ def user(username):
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         status = (username == payload["id"])
         user_info = db.users.find_one({"username": username}, {"_id": False})
+
+        if user_info is None:
+            abort(404)
+
         posts_info = list(db.posts.find({"username": username}).sort("date", -1).limit(20))
         for post in posts_info:
             print(str(post["_id"]))
@@ -241,20 +245,32 @@ def delete_user(username):
 @app.route('/p/<post_id>', methods=['GET'])
 def get_post_detail(post_id):
     token_receive = request.cookies.get('mytoken')
-    post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        is_valid_user = True if (post['username'] == payload['id']) else False
         user = db.users.find_one({'username': payload['id']}, {'_id': False})
-        return jsonify({
-            'user': user,
-            'post': post,
-            'status': is_valid_user
-        })
+
+        try:
+            post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})
+            is_valid_user = True if (post['username'] == payload['id']) else False
+
+            return jsonify({
+                'user': user,
+                'post': post,
+                'status': is_valid_user
+            })
+
+        except:
+            abort(404)
+
     except jwt.ExpiredSignatureError:
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 if __name__ == '__main__':
