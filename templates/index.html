@@ -84,29 +84,14 @@
                         </ul>
                     </div>
                 </div>
-                <div
-                        class="posting-button"
+                <div class="posting-button">
+                    <img
+                        src="/static/posting-button.svg"
+                        id="posting-icon"
+                        alt="posting-image"
                         onclick='$("#modal-post").addClass("is-active")'
-                >
-                    <img src="/static/posting-button.svg" id="posting-icon" alt="posting-image">
+                    >
                 </div>
-
-<!--                <div class="columns column is-12 is-centered is-multiline">-->
-<!--                    <p class="column is-9">추천 사용자</p>-->
-<!--                    <div id="rec_user" class="box column is-10">-->
-<!--                        {% for user in rec_user %}-->
-<!--                        <div class="container columns is-vcentered">-->
-<!--                            <a href="/user/{{ user.username }}" class="column is-3">-->
-<!--                                <img src="static/{{ user.profile_pic_real }}" alt="default-image"-->
-<!--                                     class="profile__image profile__image&#45;&#45;small">-->
-<!--                            </a>-->
-<!--                            <a href="/user/{{ user.username }}" class="column is-5">{{ user.profile_name }}</a>-->
-<!--                        </div>-->
-<!--                        {% endfor %}-->
-<!--                    </div>-->
-<!--                </div>-->
-
-
             </div>
         </div>
         <div class="modal" id="modal-post">
@@ -122,22 +107,25 @@
                                     <div class="control is-expanded">
                                         <div class="file has-name">
                                             <label class="file-label" style="width:100%">
-                                                <input id="input-pic" class="file-input" type="file"
-                                                       name="resume">
+                                                <input
+                                                    id="input-pic"
+                                                    class="file-input"
+                                                    type="file"
+                                                    accept=".png, .jpg, image/png, image/jpg"
+                                                    name="resume"
+                                                    onchange="validateExtension(event)"
+                                                >
                                                 <span class="file-cta">
-                                              <span class="file-icon"><i class="fa fa-upload"></i></span>
-                                              <span class="file-label">파일 선택</span>
-                                          </span>
-                                                <span id="file-name" class="file-name"
-                                                      style="width:100%;max-width:100%">{{ user_info.profile_pic }}</span>
+                                                    <span class="file-icon"><i class="fa fa-upload"></i></span>
+                                                    <span class="file-label">파일 선택</span>
+                                                </span>
                                             </label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="field">
                                     <label class="label">방문날짜</label>
-                                    <input class="input is-danger" id="day-post" type="text"
-                                           placeholder="ex) 2021.07.04">
+                                    <input class="input is-danger" id="day-post" type="date">
                                 </div>
                                 <div class="field">
                                     <label class="label">먹은메뉴</label>
