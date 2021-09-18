@@ -8,48 +8,63 @@
         <div class="main__inner">
             <div class="main__inner-left">
                 {% for post in list %}
-                <div class="main__card">
-                    <figure class="main__card-image">
-                        <img src="static/{{ post.post_pic_real }}"
-                             alt="{{ post.post_pic }}"
-                        >
-                    </figure>
-                    <div class="main__card-content card-content">
-                        <figure class="card-content__user-profile">
-                            <a href="/user/{{ post.username }}">
-                                <img src="static/{{ post.profile_pic_real }}"
-                                     alt="Placeholder image"
-                                     class="card-content__user-profile-image"
-                                >
-                            </a>
+                    {% if post.thumbs_by_me %}
+                        {% set class_thumbs = "fas" %}
+                    {% else %}
+                        {% set class_thumbs = "far" %}
+                    {% endif %}
+                    <div id="{{ post._id }}" class="main__card">
+                        <figure class="main__card-image">
+                            <img
+                                src="static/{{ post.post_pic_real }}"
+                                alt="{{ post.post_pic }}"
+                            >
                         </figure>
-                        <div class="card-content__description card-description">
-                            <div class="card-description__user">
-                                <a
-                                    href="/user/{{ post.username }}"
-                                    class="user-description__nick"
-                                >
-                                    {{ post.profile_name }}
+                        <div class="main__card-content card-content">
+                            <figure class="card-content__user-profile">
+                                <a href="/user/{{ post.username }}">
+                                    <img
+                                        src="static/{{ post.profile_pic_real }}"
+                                        alt="Placeholder image"
+                                        class="card-content__user-profile-image"
+                                    >
                                 </a>
-                                <a
-                                    href="/?food_give={{ post.post_title }}"
-                                    class="user-description__food-name"
-                                >
-                                    @{{ post.post_title }}
-                                </a>
-                            </div>
-
-                            <div class="card-content__post-info">
-                                <div class="card-content__post-comment">
-                                    {{ post.post_comment }}
+                            </figure>
+                            <div class="card-content__description card-description">
+                                <div class="card-description__user">
+                                    <a
+                                        href="/user/{{ post.username }}"
+                                        class="user-description__nick"
+                                    >
+                                        {{ post.profile_name }}
+                                    </a>
+                                    <a
+                                        href="/?food_give={{ post.post_title }}"
+                                        class="user-description__food-name"
+                                    >
+                                        @{{ post.post_title }}
+                                    </a>
                                 </div>
-                                <div class="card-content__date-time">
-                                    <time datetime="2016-1-1">{{ post.post_day }}</time>
+
+                                <div class="card-content__post-info">
+                                    <div class="card-content__post-comment">
+                                        {{ post.post_comment }}
+                                    </div>
+                                    <div class="card-content__date-time">
+                                        <time datetime="2016-1-1">{{ post.post_day }}</time>
+                                        <nav class="level is-mobile">
+                                            <div class="level-left">
+                                                <a class="level-item is-sparta" aria-label="thumbs" onclick="toggle_like('{{ post._id }}', 'thumbs')">
+                                                    <span class="icon is-small"><i class="{{ class_thumbs }} fa-thumbs-up"aria-hidden="true"></i></span>&nbsp;
+                                                    <span class="like-num">{{ post.count_thumbs }}</span>
+                                                </a>
+                                            </div>
+                                        </nav>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 {% endfor %}
             </div>
             <div class="main__inner-right">
@@ -62,8 +77,12 @@
                             >
                         </a>
                         <div>
-                            <a href="/user/{{ user_info.username }}" class="has-text-black-bis"><strong>{{
-                                user_info.profile_name }}</strong></a>
+                            <a
+                                href="/user/{{ user_info.username }}"
+                                class="has-text-black-bis"
+                            >
+                                <strong>{{ user_info.profile_name }}</strong>
+                            </a>
                             <p class="has-text-grey-lighter">{{ user_info.profile_info }}</p>
                         </div>
                     </div>
@@ -75,8 +94,11 @@
                             {% for user in rec_user %}
                                 <li class="recommend__user">
                                     <a href="/user/{{ user.username }}">
-                                        <img src="static/{{ user.profile_pic_real }}" alt="default-image"
-                                             class="profile__image profile__image--small">
+                                        <img
+                                            src="static/{{ user.profile_pic_real }}"
+                                            alt="default-image"
+                                            class="profile__image profile__image--small"
+                                        >
                                     </a>
                                     <a href="/user/{{ user.username }}">{{ user.profile_name }}</a>
                                 </li>
@@ -84,17 +106,20 @@
                         </ul>
                     </div>
                 </div>
+                {# 포스팅하기 버튼 요소 #}
                 <div class="posting-button">
                     <img
                         src="/static/posting-button.svg"
                         id="posting-icon"
                         alt="posting-image"
+                        {# 이미지 클릭 시 모달에 클래스 추가 #}
                         onclick='$("#modal-post").addClass("is-active")'
                     >
                 </div>
             </div>
         </div>
         <div class="modal" id="modal-post">
+            {# 모달 배경화면 클릭시 클래스 제거 => 모달 기능 비활성화 #}
             <div class="modal-background" onclick='$("#modal-post").removeClass("is-active")'></div>
             <div class="modal-content">
                 <div class="box">
@@ -105,6 +130,7 @@
                                 <div class="field">
                                     <label class="label" for="input-pic">오늘은 무엇을 드셨나요?</label>
                                     <div class="control is-expanded">
+                                        {# 파일 첨부 엘리멘트 #}
                                         <div class="file has-name">
                                             <label class="file-label" style="width:100%">
                                                 <input
@@ -115,6 +141,7 @@
                                                     name="resume"
                                                     onchange="validateExtension(event)"
                                                 >
+                                                {# 파일 선택 엘리멘트 #}
                                                 <span class="file-cta">
                                                     <span class="file-icon"><i class="fa fa-upload"></i></span>
                                                     <span class="file-label">파일 선택</span>
@@ -125,31 +152,44 @@
                                 </div>
                                 <div class="field">
                                     <label class="label">방문날짜</label>
+                                    {# 방문 날짜 엘리멘트 #}
                                     <input class="input is-danger" id="day-post" type="date">
                                 </div>
                                 <div class="field">
                                     <label class="label">먹은메뉴</label>
-                                    <input class="input is-danger" id="title-post" type="text"
-                                           placeholder="ex) 김치찌개">
+                                    {# 먹은 메뉴 엘리멘트 #}
+                                    <input
+                                        class="input is-danger"
+                                        id="title-post"
+                                        type="text"
+                                        placeholder="ex) 김치찌개"
+                                    >
                                 </div>
                                 <div class="field">
                                     <label class="label">한줄 코멘트</label>
-                                    <textarea id="comment-post" class="textarea is-danger"
-                                              placeholder="ex) 오랜만에 먹었더니 맛이 새로웠다."></textarea>
+                                    {# 한줄 코멘트 엘리멘트 #}
+                                    <textarea
+                                        id="comment-post"
+                                        class="textarea is-danger"
+                                        placeholder="ex) 오랜만에 먹었더니 맛이 새로웠다."
+                                    >
+                                    </textarea>
                                 </div>
                                 </p>
                             </div>
                             <nav class="level is-mobile">
-                                <div class="level-left">
-
-                                </div>
                                 <div class="level-right">
                                     <div class="level-item">
+                                        {# 포스팅 엘리멘트 #}
                                         <a class="button is-sparta" onclick="post()">포스팅하기</a>
                                     </div>
                                     <div class="level-item">
+                                        {# 취소 버튼 엘리멘트 #}
                                         <a class="button is-sparta is-outlined"
-                                           onclick='$("#modal-post").removeClass("is-active")'>취소</a>
+                                           onclick='$("#modal-post").removeClass("is-active")'
+                                        >
+                                            취소
+                                        </a>
                                     </div>
                                 </div>
                             </nav>
@@ -157,8 +197,14 @@
                     </article>
                 </div>
             </div>
-            <button class="modal-close is-large" aria-label="close"
-                    onclick='$("#modal-post").removeClass("is-active")'></button>
+            {# 모달 닫기 버튼 엘리멘트 #}
+            <button
+                class="modal-close is-large"
+                aria-label="close"
+                {# 클릭시 모달 클래스 삭제, 모달 비활성화 #}
+                onclick='$("#modal-post").removeClass("is-active")'
+            >
+            </button>
         </div>
     </div>
 {% endblock %}
