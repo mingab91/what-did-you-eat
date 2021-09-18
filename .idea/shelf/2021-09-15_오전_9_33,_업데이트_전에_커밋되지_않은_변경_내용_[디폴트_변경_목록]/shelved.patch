@@ -1,0 +1,37 @@
+Index: .idea/what-did-you-eat.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<module type=\"PYTHON_MODULE\" version=\"4\">\r\n  <component name=\"NewModuleRootManager\">\r\n    <content url=\"file://$MODULE_DIR$\">\r\n      <excludeFolder url=\"file://$MODULE_DIR$/venv\" />\r\n    </content>\r\n    <orderEntry type=\"inheritedJdk\" />\r\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\r\n  </component>\r\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/what-did-you-eat.iml b/.idea/what-did-you-eat.iml
+--- a/.idea/what-did-you-eat.iml	(revision 2368c8ab178a8742813606f14618a45e56e3711a)
++++ b/.idea/what-did-you-eat.iml	(date 1631665015336)
+@@ -7,4 +7,7 @@
+     <orderEntry type="inheritedJdk" />
+     <orderEntry type="sourceFolder" forTests="false" />
+   </component>
++  <component name="TemplatesService">
++    <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
++  </component>
+ </module>
+\ No newline at end of file
+Index: templates/layout.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><!--중요: 이 파일은 건들지 말아주세요. html파일을 새로 만들고,\r\n<DOCTYPE html>부터 마지막까지 전부 복사하신다음에 주석은 지워주세요. 그리고\r\n{%block content%}{% endblock %} 부분에 여러분의 html을 작성해주세요.\r\n\r\n자바스크립트 파일과 CSS 파일은 우선적으로 html 파일에 전부 작성하도록 합니다.\r\nCSS는 head의 맨 마지막에 style태그를 추가하여 작성해주세요.\r\nJAVASCRIPT는 body의 맨 마지막에 script 태그를 추가하여 작성해주세요.\r\n-->\r\n\r\n<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Title</title>\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\r\n    <!-- needed to add favicon and og tags -->\r\n    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\r\n    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\r\n    <link href=\"https://fonts.googleapis.com/css2?family=Jua&display=swap\" rel=\"stylesheet\">\r\n\r\n    <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css\">\r\n    <link href=\"{{ url_for('static', filename='index.css') }}\" rel=\"stylesheet\">\r\n\r\n    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script>\r\n    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js\"></script>\r\n    <script src=\"https://kit.fontawesome.com/d755ebaf85.js\" crossorigin=\"anonymous\"></script>\r\n<!--    <style>-->\r\n<!--        -->\r\n<!--    </style>-->\r\n</head>\r\n<body>\r\n    <div id=\"root\" class=\"container\">\r\n        <nav class=\"navbar\">\r\n            <div class=\"container\">\r\n                <div class=\"navbar-brand\">\r\n                    <a class=\"navbar-item\" href=\"/\">\r\n                        뭐먹었니?\r\n                    </a>\r\n                    <span class=\"navbar-burger\" data-target=\"navbarMenuHeroA\">\r\n                        <span></span>\r\n                        <span></span>\r\n                        <span></span>\r\n                    </span>\r\n                </div>\r\n                <div id=\"navbarMenuHeroA\" class=\"navbar-menu\">\r\n                    <div class=\"navbar-end\">\r\n                        <button class=\"navbar-item logout-button\">\r\n                            로그아웃\r\n                        </button>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n        </nav>\r\n      <main class=\"contents\">\r\n          {%block content%}{% endblock %}\r\n      </main>\r\n    </div>\r\n    <script src=\"{{ url_for('static', filename='index.js') }}\"></script>\r\n<!--    <script></script>-->\r\n</body>\r\n</html>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/templates/layout.html b/templates/layout.html
+--- a/templates/layout.html	(revision 2368c8ab178a8742813606f14618a45e56e3711a)
++++ b/templates/layout.html	(date 1631665304780)
+@@ -1,6 +1,6 @@
+ <!--중요: 이 파일은 건들지 말아주세요. html파일을 새로 만들고,
+ <DOCTYPE html>부터 마지막까지 전부 복사하신다음에 주석은 지워주세요. 그리고
+-{%block content%}{% endblock %} 부분에 여러분의 html을 작성해주세요.
++부분에 여러분의 html을 작성해주세요.
+ 
+ 자바스크립트 파일과 CSS 파일은 우선적으로 html 파일에 전부 작성하도록 합니다.
+ CSS는 head의 맨 마지막에 style태그를 추가하여 작성해주세요.
