@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="aebbccb6-dc24-46d5-a69b-0af55f2dbe4d" name="Changes" comment="its commit">
+      <change afterPath="$PROJECT_DIR$/asd.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,7 +42,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../hanghae/01" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../01" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.templateLanguages.PyTemplateLanguageModulesConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -91,26 +93,8 @@
       <workItem from="1631867498983" duration="7167000" />
       <workItem from="1631876505832" duration="1469000" />
       <workItem from="1631878262664" duration="1323000" />
-      <workItem from="1631886656199" duration="553000" />
-      <workItem from="1631923495141" duration="297000" />
-      <workItem from="1631923929424" duration="376000" />
-      <workItem from="1631924324962" duration="4297000" />
+      <workItem from="1631924807131" duration="953000" />
     </task>
-    <task id="LOCAL-00001" summary="닉네임 수정 후 메인페이지에 반영 안 되는 것 수정, 유저페이지 자기 게시물 삭제 기능 수정, 유저페이지 최신 순으로 정렬 하게 수정">
-      <created>1631886972022</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1631886972023</updated>
-    </task>
-    <task id="LOCAL-00002" summary="its commit">
-      <created>1631926563225</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1631926563225</updated>
-    </task>
-    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -129,9 +113,7 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="닉네임 수정 후 메인페이지에 반영 안 되는 것 수정, 유저페이지 자기 게시물 삭제 기능 수정, 유저페이지 최신 순으로 정렬 하게 수정" />
-    <MESSAGE value="its commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="its commit" />
+    <option name="GROUP_MULTIFILE_MERGE_BY_DIRECTORY" value="true" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/teamproject$app.coverage" NAME="app Coverage Results" MODIFIED="1631858637794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
