@@ -1,7 +1,11 @@
-function toggle_like(post_id, type) {
-    let $a_like = $(`#${post_id} a[aria-label='thumbs']`);
-    let $i_like = $a_like.find("i");
+// index.html 좋아요 버튼에 달려 있던 onclick 함수. ajax를 통해 서버에 라벨링된 게시글의 id와 좋아요의 타입(우리는 엄지) 그리고 행동(좋아요, 좋아요 취소)를 전달해준다
 
+function toggle_like(post_id, type) {
+    // 좋아요 버튼 위치 변수 할당
+    const $a_like = $(`#${post_id} a[aria-label='thumbs']`);
+    // 좋아요 버튼 옆 좋아요 숫자 변수 할당
+    const $i_like = $a_like.find("i");
+    // 좋아요 상태라면
     if ($i_like.hasClass("fas")) {
         $.ajax({
             type: "POST",
@@ -9,13 +13,15 @@ function toggle_like(post_id, type) {
             data: {
                 post_id_give: post_id,
                 type_give: type,
-                action_give: "unlike"
+                action_give: "unlike" // 액션을 unlike로 갱신해주며
             },
             success: function (response) {
+                // 아이콘의 모양과(두꺼운 엄지에서 얇은 엄지로) 좋아요 숫자를 갱신해준다
                 $i_like.addClass("far").removeClass("fas")
                 $a_like.find("span.like-num").text(response["count"])
             }
         });
+        // 좋아요 상태가 아닌 경우에는 반대로 해준다
     } else {
         $.ajax({
             type: "POST",
@@ -54,7 +60,9 @@ function validateExtension (event) {
 }
 
 function find_food() {
+    // 음식을 검색했을 시에 #search-bar라는 input박스의 값을 받아와
     const food = $('#search-bar').val();
+    // 검색어를 서버에 넘겨준다. 이 과정에서 새로고침도 된다
     window.location.href = `/?food_give=${food}`;
 }
 

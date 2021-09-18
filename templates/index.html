@@ -7,13 +7,20 @@
         </div>
         <div class="main__inner">
             <div class="main__inner-left">
+                {# list > 검색을 안 했으면 게시글(포스트) 중 최신 순 20개, 검색을 했으면 검색된 최신 순 20개 #}
                 {% for post in list %}
+                    {#
+                        thumbs_by_me 는 사용자가 해당 게시물에 좋아요를 눌렀었는지를 판단하여 boolean값을 갖고
+                        그것을 통해 fas(두꺼운 엄지, 좋아요 된 상태) far(얇은 엄지, 좋아요 취소된 상태)로 만들어준다
+                     #}
                     {% if post.thumbs_by_me %}
                         {% set class_thumbs = "fas" %}
                     {% else %}
                         {% set class_thumbs = "far" %}
                     {% endif %}
+                    {# 게시글이 카드형태로 달리는 데 그 카드의 내용을 전부 감싸는 div태크에 id를 문자열로 변환한 _id로 부여한다. 게시글에 라벨링 #}
                     <div id="{{ post._id }}" class="main__card">
+                    {#이 밑으로는 유저의 닉네임이나 프로필 사진, 먹은 음식(post_title), 음식 사진, 날짜, 좋아요 버튼, 좋아요 숫자 등을 jinja2를 통해 서버에서 가져와 반복문으로 뿌려준다#}
                         <figure class="main__card-image">
                             <img
                                 src="static/{{ post.post_pic_real }}"
@@ -54,9 +61,19 @@
                                         <time datetime="2016-1-1">{{ post.post_day }}</time>
                                         <nav class="level is-mobile">
                                             <div class="level-left">
+                                                {#좋아요 아이콘(우리는 엄지)를 a태그로 감싸고 거기에 onclick함수를 줬으며 위에 있던 게시글의 라벨링한  _id와 좋아요 타입인 thumbs를 매개변수로 넘겨준다#}
                                                 <a class="level-item is-sparta" aria-label="thumbs" onclick="toggle_like('{{ post._id }}', 'thumbs')">
-                                                    <span class="icon is-small"><i class="{{ class_thumbs }} fa-thumbs-up"aria-hidden="true"></i></span>&nbsp;
+                                                    {#class_thumbs 부분을 jinja2로 받아오기 때문에 클릭할 때 마다 변경이 가능하다#}
+                                                    <span class="icon is-small">
+                                                        <i
+                                                            class="{{ class_thumbs }} fa-thumbs-up"
+                                                            aria-hidden="true"
+                                                        >
+                                                        </i>
+                                                    </span>
+                                                    {#좋아요가 얼마나 눌렸는지도 서버를 통해 받아오고 후에 좋아요가 눌렸을 경우 toggle_like()함수의 ajax요청을 통해 갱신도 해준다#}
                                                     <span class="like-num">{{ post.count_thumbs }}</span>
+
                                                 </a>
                                             </div>
                                         </nav>
@@ -91,6 +108,7 @@
                             추천 사용자
                         </p>
                         <ul class="recommend__list">
+                            {#추천 사용자도 마찬가지로 서버로부터 받아와 포스팅해준다. 이는 users db에서 무작위로 가져온 3개#}
                             {% for user in rec_user %}
                                 <li class="recommend__user">
                                     <a href="/user/{{ user.username }}">
