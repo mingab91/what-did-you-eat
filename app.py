@@ -31,7 +31,7 @@ client = MongoClient(MONGO_ADDRESS, PORT, username=ADMIN_NAME, password=ADMIN_PA
 db = client.foodiary
 
 
-class MyEncoder(json.JSONEncoder):
+class MyEngitcoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, bytes):
             return str(obj, encoding='utf-8');
