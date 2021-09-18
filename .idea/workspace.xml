@@ -5,14 +5,36 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aebbccb6-dc24-46d5-a69b-0af55f2dbe4d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-15__9_33____________.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-15_오전_9_33,_업데이트_전에_커밋되지_않은_변경_내용_[디폴트_변경_목록]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__1_38____________.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__2_20____________.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__3_41____________.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__4_15____________.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__7_59_________Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__8_33_________Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__9_01_________Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17_오전_2_20,_업데이트_전에_커밋되지_않은_변경_내용_[디폴트_변경_목록]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17_오후_1_38,_업데이트_전에_커밋되지_않은_변경_내용_[디폴트_변경_목록]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17_오후_3_41,_업데이트_전에_커밋되지_않은_변경_내용_[디폴트_변경_목록]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17_오후_4_15,_업데이트_전에_커밋되지_않은_변경_내용_[디폴트_변경_목록]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17_오후_7_59,_업데이트_전에_커밋되지_않은_변경_내용_[Changes]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17_오후_8_33,_업데이트_전에_커밋되지_않은_변경_내용_[Changes]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17_오후_9_01,_업데이트_전에_커밋되지_않은_변경_내용_[Changes]/shelved.patch" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/s2.txt" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/sounung.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-15__8_26__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-15__8_26__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-15__8_28__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-15__8_28__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-15__9_33__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-15__9_33__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-15__9_34__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-15__9_34__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-17__1_38__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2021-09-17__1_38__Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test017_2021-09-16_1631876882743.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test017_2021-09-16_1631877217205.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test017_2021-09-21_1631876946785.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test017_2021-09-22_1631877006620.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test017_2021-09-22_1631877073011.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test017_2021-09-23_1631863528261.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test020_2021.01.01.JPG" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test020_2021.02.02.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test020_2021.05.05.JPG" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test020_2021.09.01.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/post_pics/test020_2021.09.01.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
@@ -140,7 +162,7 @@
       <workItem from="1631867498983" duration="7167000" />
       <workItem from="1631876505832" duration="1469000" />
       <workItem from="1631878262664" duration="1323000" />
-      <workItem from="1631923259557" duration="3181000" />
+      <workItem from="1631923259557" duration="3518000" />
     </task>
     <servers />
   </component>
