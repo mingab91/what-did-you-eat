@@ -1,0 +1,465 @@
+Index: app.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import json\r\nimport random\r\nfrom pymongo import MongoClient\r\nfrom bson.objectid import ObjectId\r\n\r\nimport jwt\r\nimport datetime\r\nimport hashlib\r\nimport time\r\n\r\nfrom flask import Flask, render_template, jsonify, request, redirect, url_for, abort\r\nfrom werkzeug.utils import secure_filename\r\nfrom datetime import datetime, timedelta\r\nfrom decouple import config\r\n\r\n\r\nSECRET_KEY = config('SECRET_KEY')\r\nMONGO_ADDRESS = config('ADDRESS')\r\nPORT = config('DB_PORT')\r\nADMIN_NAME = config('ADMIN_NAME')\r\nADMIN_PASSWORD = config('ADMIN_PASSWORD')\r\n\r\n\r\napp = Flask(__name__)\r\napp.config[\"TEMPLATES_AUTO_RELOAD\"] = True\r\napp.config['UPLOAD_FOLDER'] = \"./static/profile_pics\"\r\n\r\nSECRET_KEY = SECRET_KEY\r\n\r\nclient = MongoClient(MONGO_ADDRESS, PORT, username=ADMIN_NAME, password=ADMIN_PASSWORD)\r\ndb = client.foodiary\r\n\r\n\r\nclass MyEncoder(json.JSONEncoder):\r\n    def default(self, obj):\r\n        if isinstance(obj, bytes):\r\n            return str(obj, encoding='utf-8');\r\n        return json.JSONEncoder.default(self, obj)\r\n\r\n\r\napp.json_encoder = MyEncoder\r\n\r\n\r\n@app.route('/')\r\ndef home():\r\n    token_receive = request.cookies.get('mytoken')\r\n    if token_receive is None:\r\n        return redirect(url_for(\"login\"))\r\n\r\n    food_receive = request.args.get(\"food_give\")\r\n    user = list(db.users.find({}))\r\n\r\n    for item in user:\r\n        item[\"_id\"] = str(item[\"_id\"])\r\n    random_user = random.sample(user, 3)\r\n    try:\r\n        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])\r\n        user_info = db.users.find_one({\"username\": payload[\"id\"]})\r\n        if food_receive is None:\r\n            posts = list(db.posts.find({}).sort(\"upload_time\", -1).limit(20))\r\n            for post in posts:\r\n                post['_id'] = str(post['_id'])\r\n                post[\"count_thumbs\"] = db.likes.count_documents({\"post_id\": post[\"_id\"], \"type\": \"thumbs\"})\r\n                post[\"thumbs_by_me\"] = bool(db.likes.find_one({\"post_id\": post[\"_id\"], \"type\": \"thumbs\", \"username\": payload['id']}))\r\n            return render_template(\"index.html\", list=posts, rec_user=random_user, user_info=user_info)\r\n        else:\r\n            search_result = list(db.posts.find({'post_title': food_receive}).sort(\"date\", -1).limit(20))\r\n            for post in search_result:\r\n                post['_id'] = str(post['_id'])\r\n            return render_template(\"index.html\", list=search_result, rec_user=random_user, user_info=user_info)\r\n    except jwt.ExpiredSignatureError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 시간이 만료되었습니다.\"))\r\n    except jwt.exceptions.DecodeError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 정보가 존재하지 않습니다.\"))\r\n\r\n\r\n@app.route('/login')\r\ndef login():\r\n    token_receive = request.cookies.get('mytoken')\r\n    msg = request.args.get(\"msg\")\r\n    if token_receive is not None and msg is None:\r\n        return redirect(url_for(\"home\"))\r\n    else:\r\n        return render_template('login.html', msg=msg)\r\n\r\n\r\n@app.route('/sign_in', methods=['POST'])\r\ndef sign_in():\r\n    username_receive = request.form['username_give']\r\n    password_receive = request.form['password_give']\r\n\r\n    pw_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()\r\n    result = db.users.find_one({'username': username_receive, 'password': pw_hash})\r\n\r\n    if result is not None:\r\n        payload = {\r\n         'id': username_receive,\r\n         'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)\r\n        }\r\n        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')\r\n\r\n        return jsonify({'result': 'success', 'token': token})\r\n    else:\r\n        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})\r\n\r\n\r\n@app.route('/sign_up/save', methods=['POST'])\r\ndef sign_up():\r\n    username_receive = request.form['username_give']\r\n    password_receive = request.form['password_give']\r\n    password_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()\r\n    profile_receive = request.form['profile_name_receive']\r\n    doc = {\r\n        \"username\": username_receive,\r\n        \"password\": password_hash,\r\n        \"profile_name\": profile_receive,\r\n        \"profile_pic\": \"\",\r\n        \"profile_pic_real\": \"profile_pics/profile_placeholder.png\",\r\n        \"profile_info\": \"\"\r\n    }\r\n    db.users.insert_one(doc)\r\n    return jsonify({'result': 'success'})\r\n\r\n\r\n@app.route('/sign_up/check_dup', methods=['POST'])\r\ndef check_dup():\r\n    username_receive = request.form['username_give']\r\n    exists = bool(db.users.find_one({\"username\": username_receive}))\r\n    return jsonify({'result': 'success', 'exists': exists})\r\n\r\n\r\n@app.route('/new', methods=['POST'])\r\ndef add_post():\r\n    token_receive = request.cookies.get('mytoken')\r\n    try:\r\n        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])\r\n\r\n        username = payload[\"id\"]\r\n        user_info = db.users.find_one({'username': username}, {\"_id\": False})\r\n\r\n        post_title = request.form['title_give']\r\n        post_day = request.form['day_give']\r\n        post_comment = request.form['comment_give']\r\n        now = request.form['now']\r\n\r\n        new_doc = {\r\n            \"username\": user_info['username'],\r\n            \"profile_name\": user_info['profile_name'],\r\n            \"profile_pic_real\": user_info['profile_pic_real'],\r\n            \"post_title\": post_title,\r\n            \"post_day\": post_day,\r\n            \"post_comment\": post_comment,\r\n            \"upload_time\": round(time.time() * 1000)\r\n        }\r\n\r\n        if 'file_give' in request.files:\r\n            file = request.files[\"file_give\"]\r\n            filename = secure_filename(file.filename)\r\n            extension = filename.split(\".\")[-1]\r\n            file_path = f\"post_pics/{username}_{post_day}_{now}.{extension}\"\r\n            file.save(\"./static/\" + file_path)\r\n\r\n            new_doc[\"post_pic\"] = filename\r\n            new_doc[\"post_pic_real\"] = file_path\r\n\r\n        db.posts.insert_one(new_doc)\r\n        return jsonify({\"result\": \"success\", 'msg': '게시물 등록이 완료되었어요!'})\r\n    except jwt.ExpiredSignatureError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 시간이 만료되었습니다.\"))\r\n    except jwt.exceptions.DecodeError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 정보가 존재하지 않습니다.\"))\r\n\r\n\r\n@app.route('/update_like', methods=['POST'])\r\ndef update_like():\r\n    token_receive = request.cookies.get('mytoken')\r\n    try:\r\n        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])\r\n        user_info = db.users.find_one({\"username\": payload[\"id\"]})\r\n        post_id_receive = request.form[\"post_id_give\"]\r\n        type_receive = request.form[\"type_give\"]\r\n        action_receive = request.form[\"action_give\"]\r\n\r\n        doc = {\r\n            \"post_id\": post_id_receive,\r\n            \"username\": user_info[\"username\"],\r\n            \"type\": type_receive\r\n        }\r\n\r\n        if action_receive == \"like\":\r\n            db.likes.insert_one(doc)\r\n        else:\r\n            db.likes.delete_one(doc)\r\n        count = db.likes.count_documents({\"post_id\": post_id_receive, \"type\": type_receive})\r\n        return jsonify({\"result\": \"success\", 'msg': 'updated', \"count\": count})\r\n    except jwt.ExpiredSignatureError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 시간이 만료되었습니다.\"))\r\n    except jwt.exceptions.DecodeError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 정보가 존재하지 않습니다.\"))\r\n\r\n\r\n@app.route('/user/<username>', methods=['GET'])\r\ndef user(username):\r\n    token_receive = request.cookies.get('mytoken')\r\n    try:\r\n        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])\r\n        status = (username == payload[\"id\"])\r\n        user_info = db.users.find_one({\"username\": username}, {\"_id\": False})\r\n\r\n        if user_info is None:\r\n            abort(404)\r\n\r\n        posts_info = list(db.posts.find({\"username\": username}).sort(\"date\", -1).limit(20))\r\n        for post in posts_info:\r\n            post[\"_id\"] = str(post[\"_id\"])\r\n            post[\"count_thumbs\"] = db.likes.count_documents({\"post_id\": post[\"_id\"], \"type\": \"thumbs\"})\r\n            post[\"thumbs_by_me\"] = bool(db.likes.find_one({\r\n                \"post_id\": post[\"_id\"],\r\n                \"type\": \"thumbs\",\r\n                \"username\": payload['id']\r\n            }))\r\n\r\n        return render_template('user.html', user_info=user_info, status=status, posts_info=posts_info)\r\n    except jwt.ExpiredSignatureError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 시간이 만료되었습니다.\"))\r\n    except jwt.exceptions.DecodeError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 정보가 존재하지 않습니다.\"))\r\n\r\n\r\n@app.route('/user/<username>', methods=['PATCH'])\r\ndef update_user(username):\r\n    token_receive = request.cookies.get('mytoken')\r\n    try:\r\n        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])\r\n        if payload['id'] == username:\r\n            new_doc = {}\r\n            nick_receive = request.form.get('nick_give')\r\n            about_receive = request.form.get('about_give')\r\n\r\n            if nick_receive:\r\n                new_doc['profile_name'] = nick_receive\r\n            if about_receive:\r\n                new_doc['profile_info'] = about_receive\r\n\r\n            if 'file_give' in request.files:\r\n                file = request.files[\"file_give\"]\r\n                filename = secure_filename(file.filename)\r\n                extension = filename.split(\".\")[-1]\r\n\r\n                file_path = f\"profile_pics/{username}.{extension}\"\r\n                file.save(\"./static/\" + file_path)\r\n\r\n                new_doc[\"profile_pic\"] = filename\r\n                new_doc[\"profile_pic_real\"] = file_path\r\n                db.posts.update_many({'username': username}, {'$set': {\r\n                    \"profile_pic\": filename,\r\n                    \"profile_pic_real\": file_path\r\n                }})\r\n            db.users.update_one({'username': username}, {'$set': new_doc})\r\n            return jsonify({'result': 'success', 'msg': '정상적으로 수정이 완료되었습니다!'}), 200\r\n        else:\r\n            return jsonify({'result': 'failure'}), 403\r\n    except jwt.ExpiredSignatureError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 시간이 만료되었습니다.\"))\r\n    except jwt.exceptions.DecodeError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 정보가 존재하지 않습니다.\"))\r\n\r\n\r\n@app.route('/user/<username>', methods=['DELETE'])\r\ndef delete_user(username):\r\n    token_receive = request.cookies.get('mytoken')\r\n    try:\r\n        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])\r\n        if payload['id'] == username:\r\n            db.users.delete_one({'username': username})\r\n            db.posts.delete_many({'username': username})\r\n\r\n            return jsonify({'result': 'success', 'message': '그동안 저희 서비스를 이용해주셔서 감사했습니다'}), 200\r\n        else:\r\n            return jsonify({'result': 'failure', 'message': '올르지 않은 접근입니다'}), 403\r\n    except jwt.ExpiredSignatureError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 시간이 만료되었습니다.\"))\r\n    except jwt.exceptions.DecodeError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 정보가 존재하지 않습니다.\"))\r\n\r\n\r\n@app.route('/p/<post_id>', methods=['GET'])\r\ndef get_post_detail(post_id):\r\n    token_receive = request.cookies.get('mytoken')\r\n    try:\r\n        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])\r\n        user = db.users.find_one({'username': payload['id']}, {'_id': False})\r\n\r\n        try:\r\n            post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})\r\n            is_valid_user = True if (post['username'] == payload['id']) else False\r\n            return jsonify({\r\n                'user': user,\r\n                'post': post,\r\n                'status': is_valid_user,\r\n            })\r\n        except:\r\n            abort(404)\r\n\r\n    except jwt.ExpiredSignatureError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 시간이 만료되었습니다.\"))\r\n    except jwt.exceptions.DecodeError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 정보가 존재하지 않습니다.\"))\r\n\r\n\r\n@app.route('/p/<post_id>', methods=['PATCH'])\r\ndef update_comment(post_id):\r\n    token_receive = request.cookies.get('mytoken')\r\n    updated_comment = request.form.get('comment_give')\r\n    post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})\r\n    try:\r\n        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])\r\n        if post['username'] == payload['id']:\r\n            db.posts.update_one({'_id': ObjectId(post_id)}, {'$set': {\r\n                'post_comment': updated_comment\r\n            }})\r\n            return jsonify({\r\n                'result': 'success',\r\n                'msg': '성공적으로 수정이 완료되었습니다.'\r\n            })\r\n        else:\r\n            return jsonify({\r\n                'result': 'failure',\r\n                'msg': '올바르지 않은 접근입니다. 관리자에게 문의해주세요.'\r\n            })\r\n    except jwt.ExpiredSignatureError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 시간이 만료되었습니다.\"))\r\n    except jwt.exceptions.DecodeError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 정보가 존재하지 않습니다.\"))\r\n\r\n\r\n@app.route('/p/<post_id>', methods=['DELETE'])\r\ndef delete_post(post_id):\r\n    token_receive = request.cookies.get('mytoken')\r\n    post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})\r\n    user_id = post['username']\r\n    try:\r\n        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])\r\n        if post['username'] == payload['id']:\r\n            db.posts.delete_one({'username': user_id})\r\n            return jsonify({\r\n                'result': 'success',\r\n                'msg': '성공적으로 삭제가 완료되었습니다.',\r\n                'userId': user_id\r\n            })\r\n        else:\r\n            return jsonify({\r\n                'result': 'failure',\r\n                'msg': '올바르지 않은 접근입니다. 관리자에게 문의해주세요.'\r\n            })\r\n    except jwt.ExpiredSignatureError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 시간이 만료되었습니다.\"))\r\n    except jwt.exceptions.DecodeError:\r\n        return redirect(url_for(\"login\", msg=\"로그인 정보가 존재하지 않습니다.\"))\r\n\r\n\r\n@app.errorhandler(404)\r\ndef page_not_found(e):\r\n    return render_template('404.html'), 404\r\n\r\n\r\nif __name__ == '__main__':\r\n   app.run('0.0.0.0', port=5000, debug=True)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app.py b/app.py
+--- a/app.py	(revision c7dea14e3fcfcf95300a457b75094da80c2599ab)
++++ b/app.py	(date 1631880784093)
+@@ -1,4 +1,3 @@
+-import json
+ import random
+ from pymongo import MongoClient
+ from bson.objectid import ObjectId
+@@ -6,40 +5,24 @@
+ import jwt
+ import datetime
+ import hashlib
+-import time
+-
+-from flask import Flask, render_template, jsonify, request, redirect, url_for, abort
++from flask import Flask, render_template, jsonify, request, redirect, url_for
+ from werkzeug.utils import secure_filename
+ from datetime import datetime, timedelta
+ from decouple import config
+ 
+ 
+ SECRET_KEY = config('SECRET_KEY')
+-MONGO_ADDRESS = config('ADDRESS')
++IP = config('IP')
+ PORT = config('DB_PORT')
+-ADMIN_NAME = config('ADMIN_NAME')
+-ADMIN_PASSWORD = config('ADMIN_PASSWORD')
+-
+ 
+ app = Flask(__name__)
+ app.config["TEMPLATES_AUTO_RELOAD"] = True
+ app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
+ 
+ SECRET_KEY = SECRET_KEY
+-
+-client = MongoClient(MONGO_ADDRESS, PORT, username=ADMIN_NAME, password=ADMIN_PASSWORD)
+-db = client.foodiary
+-
+-
+-class MyEncoder(json.JSONEncoder):
+-    def default(self, obj):
+-        if isinstance(obj, bytes):
+-            return str(obj, encoding='utf-8');
+-        return json.JSONEncoder.default(self, obj)
+-
+-
+-app.json_encoder = MyEncoder
+-
++client = MongoClient(IP, int(PORT))
++DBNAME = client.dbsparta_plus_week4
++db = client.dbsparta_plus_week4
+ 
+ @app.route('/')
+ def home():
+@@ -49,24 +32,20 @@
+ 
+     food_receive = request.args.get("food_give")
+     user = list(db.users.find({}))
+-
+     for item in user:
+         item["_id"] = str(item["_id"])
+     random_user = random.sample(user, 3)
+     try:
+         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+         user_info = db.users.find_one({"username": payload["id"]})
+-        if food_receive is None:
+-            posts = list(db.posts.find({}).sort("upload_time", -1).limit(20))
+-            for post in posts:
+-                post['_id'] = str(post['_id'])
+-                post["count_thumbs"] = db.likes.count_documents({"post_id": post["_id"], "type": "thumbs"})
+-                post["thumbs_by_me"] = bool(db.likes.find_one({"post_id": post["_id"], "type": "thumbs", "username": payload['id']}))
++        if food_receive == None:
++            # 최근순으로 작성되어지는 포스트 솔팅해서 구현.
++            posts = list(db.posts.find({}))
+             return render_template("index.html", list=posts, rec_user=random_user, user_info=user_info)
+         else:
+-            search_result = list(db.posts.find({'post_title': food_receive}).sort("date", -1).limit(20))
+-            for post in search_result:
+-                post['_id'] = str(post['_id'])
++            # 최근순으로 작성되어지는 포스트 솔팅하기.
++            search_result = list(db.posts.find({'post_title': food_receive}))
++
+             return render_template("index.html", list=search_result, rec_user=random_user, user_info=user_info)
+     except jwt.ExpiredSignatureError:
+         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+@@ -83,7 +62,6 @@
+     else:
+         return render_template('login.html', msg=msg)
+ 
+-
+ @app.route('/sign_in', methods=['POST'])
+ def sign_in():
+     username_receive = request.form['username_give']
+@@ -95,7 +73,7 @@
+     if result is not None:
+         payload = {
+          'id': username_receive,
+-         'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
++         'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
+         }
+         token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+ 
+@@ -141,7 +119,6 @@
+         post_title = request.form['title_give']
+         post_day = request.form['day_give']
+         post_comment = request.form['comment_give']
+-        now = request.form['now']
+ 
+         new_doc = {
+             "username": user_info['username'],
+@@ -149,76 +126,38 @@
+             "profile_pic_real": user_info['profile_pic_real'],
+             "post_title": post_title,
+             "post_day": post_day,
+-            "post_comment": post_comment,
+-            "upload_time": round(time.time() * 1000)
++            "post_comment": post_comment
+         }
+ 
+         if 'file_give' in request.files:
+             file = request.files["file_give"]
+             filename = secure_filename(file.filename)
+             extension = filename.split(".")[-1]
+-            file_path = f"post_pics/{username}_{post_day}_{now}.{extension}"
++            # file_path = f"post_pics/{username}_{post_day}_{str(datetime.utcnow())}.{extension}"
++            file_path = f"post_pics/{username}_{post_day}.{extension}"
+             file.save("./static/" + file_path)
+ 
+             new_doc["post_pic"] = filename
+             new_doc["post_pic_real"] = file_path
+ 
+         db.posts.insert_one(new_doc)
+-        return jsonify({"result": "success", 'msg': '게시물 등록이 완료되었어요!'})
+-    except jwt.ExpiredSignatureError:
+-        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+-    except jwt.exceptions.DecodeError:
+-        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+-
+-
+-@app.route('/update_like', methods=['POST'])
+-def update_like():
+-    token_receive = request.cookies.get('mytoken')
+-    try:
+-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+-        user_info = db.users.find_one({"username": payload["id"]})
+-        post_id_receive = request.form["post_id_give"]
+-        type_receive = request.form["type_give"]
+-        action_receive = request.form["action_give"]
+-
+-        doc = {
+-            "post_id": post_id_receive,
+-            "username": user_info["username"],
+-            "type": type_receive
+-        }
+-
+-        if action_receive == "like":
+-            db.likes.insert_one(doc)
+-        else:
+-            db.likes.delete_one(doc)
+-        count = db.likes.count_documents({"post_id": post_id_receive, "type": type_receive})
+-        return jsonify({"result": "success", 'msg': 'updated', "count": count})
++        return jsonify({"result": "success", 'msg': '프로필을 업데이트했습니다.'})
+     except jwt.ExpiredSignatureError:
+         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+     except jwt.exceptions.DecodeError:
+         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+ 
+-
+-@app.route('/user/<username>', methods=['GET'])
++@app.route('/user/<username>')
+ def user(username):
+     token_receive = request.cookies.get('mytoken')
+     try:
+         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+         status = (username == payload["id"])
+         user_info = db.users.find_one({"username": username}, {"_id": False})
+-
+-        if user_info is None:
+-            abort(404)
+-
+         posts_info = list(db.posts.find({"username": username}).sort("date", -1).limit(20))
+         for post in posts_info:
++            print(str(post["_id"]))
+             post["_id"] = str(post["_id"])
+-            post["count_thumbs"] = db.likes.count_documents({"post_id": post["_id"], "type": "thumbs"})
+-            post["thumbs_by_me"] = bool(db.likes.find_one({
+-                "post_id": post["_id"],
+-                "type": "thumbs",
+-                "username": payload['id']
+-            }))
+ 
+         return render_template('user.html', user_info=user_info, status=status, posts_info=posts_info)
+     except jwt.ExpiredSignatureError:
+@@ -234,13 +173,8 @@
+         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+         if payload['id'] == username:
+             new_doc = {}
+-            nick_receive = request.form.get('nick_give')
+-            about_receive = request.form.get('about_give')
+-
+-            if nick_receive:
+-                new_doc['profile_name'] = nick_receive
+-            if about_receive:
+-                new_doc['profile_info'] = about_receive
++            nick_receive = request.form['nick_give']
++            if nick_receive: new_doc['profile_name'] = nick_receive
+ 
+             if 'file_give' in request.files:
+                 file = request.files["file_give"]
+@@ -252,10 +186,7 @@
+ 
+                 new_doc["profile_pic"] = filename
+                 new_doc["profile_pic_real"] = file_path
+-                db.posts.update_many({'username': username}, {'$set': {
+-                    "profile_pic": filename,
+-                    "profile_pic_real": file_path
+-                }})
++
+             db.users.update_one({'username': username}, {'$set': new_doc})
+             return jsonify({'result': 'success', 'msg': '정상적으로 수정이 완료되었습니다!'}), 200
+         else:
+@@ -265,7 +196,6 @@
+     except jwt.exceptions.DecodeError:
+         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+ 
+-
+ @app.route('/user/<username>', methods=['DELETE'])
+ def delete_user(username):
+     token_receive = request.cookies.get('mytoken')
+@@ -275,11 +205,11 @@
+             db.users.delete_one({'username': username})
+             db.posts.delete_many({'username': username})
+ 
+-            return jsonify({'result': 'success', 'message': '그동안 저희 서비스를 이용해주셔서 감사했습니다'}), 200
++            return jsonify({'result': 'success', 'message': '그동안 저희 서비스를 이용해주셔서 감사했습니다'})
+         else:
+             return jsonify({'result': 'failure', 'message': '올르지 않은 접근입니다'}), 403
+     except jwt.ExpiredSignatureError:
+-        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
++            return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+     except jwt.exceptions.DecodeError:
+         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+ 
+@@ -287,82 +217,21 @@
+ @app.route('/p/<post_id>', methods=['GET'])
+ def get_post_detail(post_id):
+     token_receive = request.cookies.get('mytoken')
++    post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})
+     try:
+         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
++        is_valid_user = True if (post['username'] == payload['id']) else False
+         user = db.users.find_one({'username': payload['id']}, {'_id': False})
+-
+-        try:
+-            post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})
+-            is_valid_user = True if (post['username'] == payload['id']) else False
+-            return jsonify({
+-                'user': user,
+-                'post': post,
+-                'status': is_valid_user,
+-            })
+-        except:
+-            abort(404)
+-
++        return jsonify({
++            'user': user,
++            'post': post,
++            'status': is_valid_user
++        })
+     except jwt.ExpiredSignatureError:
+-        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
++            return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+     except jwt.exceptions.DecodeError:
+-        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
++            return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+ 
+ 
+-@app.route('/p/<post_id>', methods=['PATCH'])
+-def update_comment(post_id):
+-    token_receive = request.cookies.get('mytoken')
+-    updated_comment = request.form.get('comment_give')
+-    post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})
+-    try:
+-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+-        if post['username'] == payload['id']:
+-            db.posts.update_one({'_id': ObjectId(post_id)}, {'$set': {
+-                'post_comment': updated_comment
+-            }})
+-            return jsonify({
+-                'result': 'success',
+-                'msg': '성공적으로 수정이 완료되었습니다.'
+-            })
+-        else:
+-            return jsonify({
+-                'result': 'failure',
+-                'msg': '올바르지 않은 접근입니다. 관리자에게 문의해주세요.'
+-            })
+-    except jwt.ExpiredSignatureError:
+-        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+-    except jwt.exceptions.DecodeError:
+-        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+-
+-
+-@app.route('/p/<post_id>', methods=['DELETE'])
+-def delete_post(post_id):
+-    token_receive = request.cookies.get('mytoken')
+-    post = db.posts.find_one({'_id': ObjectId(post_id)}, {'_id': False})
+-    user_id = post['username']
+-    try:
+-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+-        if post['username'] == payload['id']:
+-            db.posts.delete_one({'username': user_id})
+-            return jsonify({
+-                'result': 'success',
+-                'msg': '성공적으로 삭제가 완료되었습니다.',
+-                'userId': user_id
+-            })
+-        else:
+-            return jsonify({
+-                'result': 'failure',
+-                'msg': '올바르지 않은 접근입니다. 관리자에게 문의해주세요.'
+-            })
+-    except jwt.ExpiredSignatureError:
+-        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+-    except jwt.exceptions.DecodeError:
+-        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+-
+-
+-@app.errorhandler(404)
+-def page_not_found(e):
+-    return render_template('404.html'), 404
+-
+-
+ if __name__ == '__main__':
+    app.run('0.0.0.0', port=5000, debug=True)
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"aebbccb6-dc24-46d5-a69b-0af55f2dbe4d\" name=\"Changes\" comment=\"\">\r\n      <change afterPath=\"$PROJECT_DIR$/static/foodiary_thumbnail.png\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/static/index.css\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/static/index.css\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/static/user.js\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/static/user.js\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/templates/404.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/templates/404.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/templates/layout.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/templates/layout.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/templates/login.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/templates/login.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/templates/user.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/templates/user.html\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FlaskConsoleOptions\" custom-start-script=\"import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\\nApp: %s [%s]\\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))\">\r\n    <envs>\r\n      <env key=\"FLASK_APP\" value=\"app\" />\r\n    </envs>\r\n    <option name=\"myCustomStartScript\" value=\"import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\\nApp: %s [%s]\\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))\" />\r\n    <option name=\"myEnvs\">\r\n      <map>\r\n        <entry key=\"FLASK_APP\" value=\"app\" />\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitSEFilterConfiguration\">\r\n    <file-type-list>\r\n      <filtered-out-file-type name=\"LOCAL_BRANCH\" />\r\n      <filtered-out-file-type name=\"REMOTE_BRANCH\" />\r\n      <filtered-out-file-type name=\"TAG\" />\r\n      <filtered-out-file-type name=\"COMMIT_BY_MESSAGE\" />\r\n    </file-type-list>\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"1y9XohGbsCr0QNMBHqnxr3q0gPA\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\r\n    <property name=\"RunOnceActivity.ShowReadmeOnStart\" value=\"true\" />\r\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\r\n    <property name=\"last_opened_file_path\" value=\"$PROJECT_DIR$/../01\" />\r\n    <property name=\"settings.editor.selected.configurable\" value=\"com.jetbrains.python.templateLanguages.PyTemplateLanguageModulesConfigurable\" />\r\n  </component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"$PROJECT_DIR$/static\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"app\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <module name=\"teamproject\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"true\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/app.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"false\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Python.app\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"aebbccb6-dc24-46d5-a69b-0af55f2dbe4d\" name=\"Changes\" comment=\"\" />\r\n      <created>1631664954010</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1631664954010</updated>\r\n      <workItem from=\"1631664958783\" duration=\"38000\" />\r\n      <workItem from=\"1631856989084\" duration=\"3167000\" />\r\n      <workItem from=\"1631860517980\" duration=\"1900000\" />\r\n      <workItem from=\"1631867498983\" duration=\"7167000\" />\r\n      <workItem from=\"1631876505832\" duration=\"1469000\" />\r\n      <workItem from=\"1631878262664\" duration=\"1323000\" />\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"com.intellij.coverage.CoverageDataManagerImpl\">\r\n    <SUITE FILE_PATH=\"coverage/teamproject$app.coverage\" NAME=\"app Coverage Results\" MODIFIED=\"1631858637794\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"true\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$\" />\r\n    <SUITE FILE_PATH=\"coverage/app_py$app.coverage\" NAME=\"app Coverage Results\" MODIFIED=\"1631878890426\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"true\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision c7dea14e3fcfcf95300a457b75094da80c2599ab)
++++ b/.idea/workspace.xml	(date 1631925589530)
+@@ -2,12 +2,17 @@
+ <project version="4">
+   <component name="ChangeListManager">
+     <list default="true" id="aebbccb6-dc24-46d5-a69b-0af55f2dbe4d" name="Changes" comment="">
+-      <change afterPath="$PROJECT_DIR$/static/foodiary_thumbnail.png" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/static/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/index.css" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/static/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/index.js" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/static/login.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/login.css" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/static/login.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/login.js" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/static/user.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/user.css" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/static/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/user.js" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/templates/404.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/404.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/templates/layout.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout.html" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/templates/user.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/user.html" afterDir="false" />
+@@ -48,7 +53,7 @@
+     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+     <property name="WebServerToolWindowFactoryState" value="false" />
+-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../01" />
++    <property name="last_opened_file_path" value="$PROJECT_DIR$/../what-did-you-eat-master" />
+     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.templateLanguages.PyTemplateLanguageModulesConfigurable" />
+   </component>
+   <component name="RecentsManager">
+@@ -56,7 +61,51 @@
+       <recent name="$PROJECT_DIR$/static" />
+     </key>
+   </component>
+-  <component name="RunManager">
++  <component name="RunManager" selected="Python.app (1)">
++    <configuration name="app (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
++      <module name="teamproject" />
++      <option name="INTERPRETER_OPTIONS" value="" />
++      <option name="PARENT_ENVS" value="true" />
++      <envs>
++        <env name="PYTHONUNBUFFERED" value="1" />
++      </envs>
++      <option name="SDK_HOME" value="" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../what-did-you-eat-master" />
++      <option name="IS_MODULE_SDK" value="false" />
++      <option name="ADD_CONTENT_ROOTS" value="true" />
++      <option name="ADD_SOURCE_ROOTS" value="true" />
++      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
++      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../what-did-you-eat-master/app.py" />
++      <option name="PARAMETERS" value="" />
++      <option name="SHOW_COMMAND_LINE" value="false" />
++      <option name="EMULATE_TERMINAL" value="false" />
++      <option name="MODULE_MODE" value="false" />
++      <option name="REDIRECT_INPUT" value="false" />
++      <option name="INPUT_FILE" value="" />
++      <method v="2" />
++    </configuration>
++    <configuration name="app (2)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
++      <module name="teamproject" />
++      <option name="INTERPRETER_OPTIONS" value="" />
++      <option name="PARENT_ENVS" value="true" />
++      <envs>
++        <env name="PYTHONUNBUFFERED" value="1" />
++      </envs>
++      <option name="SDK_HOME" value="" />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../사본what-did-you-eat" />
++      <option name="IS_MODULE_SDK" value="false" />
++      <option name="ADD_CONTENT_ROOTS" value="true" />
++      <option name="ADD_SOURCE_ROOTS" value="true" />
++      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
++      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../사본what-did-you-eat/app.py" />
++      <option name="PARAMETERS" value="" />
++      <option name="SHOW_COMMAND_LINE" value="false" />
++      <option name="EMULATE_TERMINAL" value="false" />
++      <option name="MODULE_MODE" value="false" />
++      <option name="REDIRECT_INPUT" value="false" />
++      <option name="INPUT_FILE" value="" />
++      <method v="2" />
++    </configuration>
+     <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+       <module name="teamproject" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+@@ -81,7 +130,9 @@
+     </configuration>
+     <recent_temporary>
+       <list>
++        <item itemvalue="Python.app (1)" />
+         <item itemvalue="Python.app" />
++        <item itemvalue="Python.app (2)" />
+       </list>
+     </recent_temporary>
+   </component>
+@@ -99,6 +150,8 @@
+       <workItem from="1631867498983" duration="7167000" />
+       <workItem from="1631876505832" duration="1469000" />
+       <workItem from="1631878262664" duration="1323000" />
++      <workItem from="1631881359785" duration="316000" />
++      <workItem from="1631881800864" duration="31000" />
+     </task>
+     <servers />
+   </component>
+@@ -106,7 +159,9 @@
+     <option name="version" value="3" />
+   </component>
+   <component name="com.intellij.coverage.CoverageDataManagerImpl">
++    <SUITE FILE_PATH="coverage/app_py$app__1_.coverage" NAME="app (1) Coverage Results" MODIFIED="1631881500327" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../what-did-you-eat-master" />
++    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1631881467045" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+     <SUITE FILE_PATH="coverage/teamproject$app.coverage" NAME="app Coverage Results" MODIFIED="1631858637794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+-    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1631878890426" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
++    <SUITE FILE_PATH="coverage/app_py$app__2_.coverage" NAME="app (2) Coverage Results" MODIFIED="1631881373313" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../사본what-did-you-eat" />
+   </component>
+ </project>
+\ No newline at end of file

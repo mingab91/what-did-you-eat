@@ -15,7 +15,7 @@ from decouple import config
 
 
 SECRET_KEY = config('SECRET_KEY')
-MONGO_ADDRESS = config('MONGO_ADDRESS')
+MONGO_ADDRESS = config('ADDRESS')
 PORT = config('DB_PORT')
 ADMIN_NAME = config('ADMIN_NAME')
 ADMIN_PASSWORD = config('ADMIN_PASSWORD')
@@ -27,11 +27,11 @@ app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 
 SECRET_KEY = SECRET_KEY
 
-client = MongoClient(MONGO_ADDRESS, int(PORT), username=ADMIN_NAME, password=ADMIN_PASSWORD)
+client = MongoClient(MONGO_ADDRESS, PORT, username=ADMIN_NAME, password=ADMIN_PASSWORD)
 db = client.foodiary
 
 
-class MyEncoder(json.JSONEncoder):
+class MyEngitcoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, bytes):
             return str(obj, encoding='utf-8');
@@ -210,7 +210,7 @@ def user(username):
         if user_info is None:
             abort(404)
 
-        posts_info = list(db.posts.find({"username": username}).sort("upload_time", -1).limit(20))
+        posts_info = list(db.posts.find({"username": username}).sort("date", -1).limit(20))
         for post in posts_info:
             post["_id"] = str(post["_id"])
             post["count_thumbs"] = db.likes.count_documents({"post_id": post["_id"], "type": "thumbs"})
@@ -254,10 +254,8 @@ def update_user(username):
                 new_doc["profile_pic_real"] = file_path
                 db.posts.update_many({'username': username}, {'$set': {
                     "profile_pic": filename,
-                    "profile_pic_real": file_path,
-                    "profile_name": nick_receive
+                    "profile_pic_real": file_path
                 }})
-            db.posts.update_many({'username': username}, {'$set': {"profile_name": nick_receive}})
             db.users.update_one({'username': username}, {'$set': new_doc})
             return jsonify({'result': 'success', 'msg': '정상적으로 수정이 완료되었습니다!'}), 200
         else:
@@ -344,7 +342,7 @@ def delete_post(post_id):
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         if post['username'] == payload['id']:
-            db.posts.delete_one({'_id': ObjectId(post_id)})
+            db.posts.delete_one({'username': user_id})
             return jsonify({
                 'result': 'success',
                 'msg': '성공적으로 삭제가 완료되었습니다.',
