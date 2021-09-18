@@ -2,6 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="aebbccb6-dc24-46d5-a69b-0af55f2dbe4d" name="Changes" comment="">
+<<<<<<< HEAD
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-15__9_33____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-15__9_33____________.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__1_38____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__1_38____________.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__2_20____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__2_20____________.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__3_41____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__3_41____________.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__4_15____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__4_15____________.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__7_59_________Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__7_59_________Changes_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__8_33_________Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__8_33_________Changes_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__9_01_________Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__9_01_________Changes_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+=======
       <change afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-15__9_33____________.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-15_오전_9_33,_업데이트_전에_커밋되지_않은_변경_내용_[디폴트_변경_목록]/shelved.patch" afterDir="false" />
@@ -34,6 +45,7 @@
       <change afterPath="$PROJECT_DIR$/static/post_pics/test020_2021.09.01.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
+>>>>>>> e0a95c8d88857fa99853150ab5361367e61da0de
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,6 +141,9 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="GROUP_MULTIFILE_MERGE_BY_DIRECTORY" value="true" />
   </component>
@@ -136,6 +151,11 @@
     <SUITE FILE_PATH="coverage/app_py$app__1_.coverage" NAME="app (1) Coverage Results" MODIFIED="1631881500327" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../what-did-you-eat-master" />
     <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1631881467045" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/teamproject$app.coverage" NAME="app Coverage Results" MODIFIED="1631858637794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+<<<<<<< HEAD
+    <SUITE FILE_PATH="coverage/app_py$app.coverage" NAME="app Coverage Results" MODIFIED="1631924888172" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/what_did_you_eat$app.coverage" NAME="app 커버리지 결과" MODIFIED="1631768507786" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+=======
     <SUITE FILE_PATH="coverage/app_py$app__2_.coverage" NAME="app (2) Coverage Results" MODIFIED="1631881373313" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../사본what-did-you-eat" />
+>>>>>>> e0a95c8d88857fa99853150ab5361367e61da0de
   </component>
 </project>
