@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="aebbccb6-dc24-46d5-a69b-0af55f2dbe4d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-15__9_33____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-15__9_33____________.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__1_38____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__1_38____________.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__2_20____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__2_20____________.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__3_41____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__3_41____________.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__4_15____________.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__4_15____________.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__7_59_________Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__7_59_________Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__8_33_________Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__8_33_________Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/2021-09-17__9_01_________Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/2021-09-17__9_01_________Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="aebbccb6-dc24-46d5-a69b-0af55f2dbe4d" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -147,6 +137,15 @@
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
